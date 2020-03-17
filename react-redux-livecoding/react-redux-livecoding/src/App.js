@@ -1,26 +1,25 @@
 import React, { Component } from 'react'
 import { Provider } from 'react-redux'
-import logo from './logo.svg'
+import { PersistGate } from 'redux-persist/integration/react'
 import './App.css'
-import Posts from './components/Posts'
-import PostForm from './components/PostForm'
-import store from './redux/store'
+import Login from './components/Login'
+import { store } from './redux/store'
+import { persistor } from './redux/store'
 
 class App extends Component {
 
   render() {
     return (
-      <Provider store={ store }>
+      <Provider store={store}>
+      <PersistGate loading={null} persistor={ persistor }>
         <div className="App">
-          <header className="App-header">
-            <img src={ logo } className="App-logo"  alt="logo" />
+          <header>
             <h1 className="App-title" >Welcome to React</h1>
           </header>
-          <PostForm />
-          <hr />
-          <Posts />
+          <Login />
         </div>
-      </Provider>
+      </PersistGate>
+    </Provider>
     )
   }
 }
