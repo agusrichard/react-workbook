@@ -6,6 +6,7 @@ export const userLogin = userData => dispatch => {
   console.log(userData)
   axios.post('http://localhost:5000/auth/login', userData)
     .then(res => {
+      axios.get()
       dispatch({
         type: USER_LOGIN,
         payload: res.data.data
