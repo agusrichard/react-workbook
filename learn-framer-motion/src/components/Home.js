@@ -4,16 +4,26 @@ import { motion } from 'framer-motion'
 
 const Home = () => {
   return (
-    <div className="home container">
-      <motion.h2 animate={{ fontSize: 50 }}>
+    <motion.div className="home container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.5, duration: 1.5 }}
+    >
+      <h2>
         Welcome to Pizza Joint
-      </motion.h2>
+      </h2>
       <Link to="/base">
-        <button>
+        <motion.button
+          whileHover={{
+            scale: 1.1,
+            textShadow: '0px 0px 8px rgb(255,255,255)',
+            boxShadow: '0px 0px 8px rgb(255,255,255)'
+          }}
+        >
           Create Your Pizza
-        </button>
+        </motion.button>
       </Link>
-    </div>
+    </motion.div>
   )
 }
 
