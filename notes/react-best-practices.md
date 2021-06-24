@@ -376,6 +376,220 @@ const onClickHandler = () => {
 ### 21. Alt Prop
 - Always include alt prop for `<img/>` tags.
 
+
+## [Clean Code vs. Dirty Code: React Best Practices](https://americanexpress.io/clean-code-dirty-code/)
+
+### Theory
+
+- If it isn't feel right, it probably isn't
+- If it feels like you’re trying to fit a square peg into a round hole, then pause, step back, and take a break. Nine times out of 10, you’ll come up with a better solution.
+- DRYing your code may actually increase code size. However, DRYing your code also generally improves maintainability.
+- Clean code is predictable and testable
+- Clean code is self-commenting
+- Self-commenting code will prevent us to have self-inflicting code and comments. For example, we write some code and its comment. If in another time we find bug, it means that we have to change the comment too.
+- Naming things
+  - Boolean variables, or functions that return a boolean value, should start with “is,” “has” or “should.”
+  - A boolean variable should be a yes-no question
+    ```javascript
+    // Dirty
+    const done = current >= goal;
+    // Clean
+    const isComplete = current >= goal;
+    ```
+  - Functions should be named for what they do, not how they do it. Because how you do it may change some day, and you shouldn’t need to refactor your consuming code because of it.
+    ```javascript
+    // Dirty
+    const loadConfigFromServer = () => {
+      ...
+    };
+
+    // Clean
+    const loadConfig = () => {
+      ...
+    };
+    ```
+- Clean code follows proven design patterns and best practices
+  - Use small functions, each with a single responsibility. This is called the single responsibility principle.
+  - Breaking up complex components into smaller ones. This is better for testability.
+- Clean code doesn’t (necessarily) take longer to write
+
+### Practical Examples
+- DRY up some code
+  ```javascript
+  // Dirty
+  import Title from './Title';
+  export const Thingie = ({ description }) => (
+    <div class="thingie">
+      <div class="description-wrapper">
+        <Description value={description} />
+      </div>
+    </div>
+  );
+  export const ThingieWithTitle = ({ title, description }) => (
+    <div>
+      <Title value={title} />
+      <div class="description-wrapper">
+        <Description value={description} />
+      </div>
+    </div>
+  );
+
+  // Clean
+  import Title from './Title';
+  export const Thingie = ({ description, children }) => (
+    <div class="thingie">
+      {children}
+      <div class="description-wrapper">
+        <Description value={description} />
+      </div>
+    </div>
+  );
+  export const ThingieWithTitle = ({ title, ...others }) => (
+    <Thingie {...others}>
+      <Title value={title} />
+    </Thingie>
+  );
+  ```
+- Default values
+  ```javascript
+  // Dirty
+  const Icon = ({ className, onClick }) => {
+    const additionalClasses = className || 'icon-large';
+    return (
+      <span
+        className={`icon-hover ${additionalClasses}`}
+        onClick={onClick}>
+      </span>
+    );
+  };
+
+  // Clean
+  const Icon = ({ className = 'icon-large', onClick }) => (
+    <span className={`icon-hover ${className}`} onClick={onClick} />
+  );
+
+  // Cleaner
+  const Icon = ({ className, onClick }) => (
+    <span className={`icon-hover ${className}`} onClick={onClick} />
+  );
+  Icon.defaultProps = {
+    className: 'icon-large',
+  };
+  ```
+
+- Separate stateful aspects from rendering
+  - Data logic and presentation (rendering) should be separated.
+  - Instead, write a stateful container component whose single responsibility is to load the data. Then write another component whose sole responsibility is to display the data. This is called the Container Pattern.
+  - Separate stateful and stateless components.
+  ```javascript
+  // Dirty
+  class User extends Component {
+    state = { loading: true };
+
+    render() {
+      const { loading, user } = this.state;
+      return loading
+        ? <div>Loading...</div>
+        : <div>
+            <div>
+              First name: {user.firstName}
+            </div>
+            <div>
+              First name: {user.lastName}
+            </div>
+            ...
+          </div>;
+    }
+
+    componentDidMount() {
+      fetchUser(this.props.id)
+        .then((user) => { this.setState({ loading: false, user })})
+    }
+  }
+
+  // Clean
+  import RenderUser from './RenderUser';
+  class User extends Component {
+    state = { loading: true };
+
+    render() {
+      const { loading, user } = this.state;
+      return loading ? <Loading /> : <RenderUser user={user} />;
+    }
+
+    componentDidMount() {
+      fetchUser(this.props.id)
+        .then(user => { this.setState({ loading: false, user })})
+    }
+  }
+  ```
+- Use stateless functional components
+  ```javascript
+  // Dirty
+  class TableRowWrapper extends Component {
+    render() {
+      return (
+        <tr>
+          {this.props.children}
+        </tr>
+      );
+    }
+  }
+  // Clean
+  const TableRowWrapper = ({ children }) => (
+    <tr>
+      {children}
+    </tr>
+  );
+  ```
+- Rest/spread
+  ```javascript
+  // Dirty
+  const MyComponent = (props) => {
+    const others = Object.assign({}, props);
+    delete others.className;
+    return (
+      <div className={props.className}>
+        {React.createElement(MyOtherComponent, others)}
+      </div>
+    );
+  };
+
+  // Clean
+  const MyComponent = ({ className, ...others }) => (
+    <div className={className}>
+      <MyOtherComponent {...others} />
+    </div>
+  );
+  ```
+
+- Destructure when applicable
+  - Object destructuring
+    ```javascript
+    // Dirty
+    componentWillReceiveProps(newProps) {
+      this.setState({
+        active: newProps.active
+      });
+    }
+
+    // Clean
+    componentWillReceiveProps({ active }) {
+      this.setState({ active });
+    }
+    ```
+  - Array destructuring
+  ```javascript
+  // Dirty
+  const splitLocale = locale.split('-');
+  const language = splitLocale[0];
+  const country = splitLocale[1];
+
+  // Clean
+  const [language, country] = locale.split('-');
+  ```
+
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
+- https://americanexpress.io/clean-code-dirty-code/
