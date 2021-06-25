@@ -468,5 +468,148 @@ const toggleButton = () => setIsDisabled(!isDisabled)
 const toggleButton = () => setIsDisabled(isDisabled => !isDisabled)
 ```
 
+## [Clean Code in React](https://davidfeng.us/2019/01/clean-code/)
+
+> Any fool can write code that a computer can understand. Good programmers write code that humans can understand.
+
+An example of refactoring by the author (David Fend)
+
+- Before refactoring (certainly is dirty)
+```javascript
+import React from 'react';
+import { fetchFeaturedBusinesses } from '../../util/business_api_util';
+
+import HomeBarContainer from './home_bar_container';
+import SearchBar from '../header/search_bar';
+import HomeLinks from './home_links';
+import { FeaturedBusinesses, Categories } from './home_util';
+
+export default class Home extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      defaultBackground: true,
+      loading: true,
+      businesses: [],
+    };
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  componentDidMount() {
+    this.handleClick();
+  }
+
+  handleClick() {
+    fetchFeaturedBusinesses().then((businesses) => {
+      this.setState((prevState) => ({
+        loading: false,
+        businesses,
+        defaultBackground: !prevState.defaultBackground,
+      }));
+    });
+  }
+
+  homeHero() {
+    let homeHeroContent = (
+      <div>
+        <HomeBarContainer />
+        <div className="logo" onClick={this.handleClick}>
+          <img src={window.staticImages.homeLogo} />
+        </div>
+        <div className="home-search">
+          <SearchBar />
+        </div>
+        <HomeLinks />
+      </div>
+    );
+    return (
+      <div
+        className={
+          this.state.defaultBackground ? 'home-header-1' : 'home-header-2'
+        }
+      >
+        {homeHeroContent}
+      </div>
+    );
+  }
+
+  featuredBusinesses() {
+    return this.state.loading ? (
+      <img className="spinner" src={window.staticImages.spinner} />
+    ) : (
+      <FeaturedBusinesses businesses={this.state.businesses} />
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        {this.homeHero()}
+        <div className="center">{this.featuredBusinesses()}</div>
+        <Categories />
+      </div>
+    );
+  }
+}
+```
+
+- After clean up the code
+```javascript
+import React from 'react';
+import PropTypes from 'prop-types';
+import HomeHero from './HomeHero';
+import FeaturedBusinesses from './FeaturedBusinesses';
+import Categories from './Categories';
+
+const Home = ({
+  handleHomeLogoClick,
+  hasDefaultBackground,
+  featuredBusinesses,
+  isLoading,
+}) => (
+  <div>
+    <HomeHero
+      handleHomeLogoClick={handleHomeLogoClick}
+      hasDefaultBackground={hasDefaultBackground}
+    />
+    <FeaturedBusinesses
+      featuredBusinesses={featuredBusinesses}
+      isLoading={isLoading}
+    />
+    <Categories />
+  </div>
+);
+
+export default Home;
+
+Home.propTypes = {
+  handleHomeLogoClick: PropTypes.func.isRequired,
+  hasDefaultBackground: PropTypes.bool.isRequired,
+  featuredBusinesses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  isLoading: PropTypes.bool.isRequired,
+};
+```
+
+### Split the container and presentational components
+- Container component handles all the logic
+- Presentational component handles the display only
+- This will result in having more files, but smaller
+- If the logic is straightforward enough and simple, we may not separate these two
+
+### Eslint is your friend
+- Recommendation: use eslint-config-airbnb
+- Use propTypes
+
+### Break down the component: only one level of abstraction per component
+- One component only has to do one thing, and do it well (Single Responsibility Principle)
+
+### Break down the function: only one level of abstraction per function
+- The same as the previous point. But this time, it applies to function
+
+### Use more descriptive names
+
 ## References:
 - https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/
+- https://betterprogramming.pub/8-ways-to-write-clean-react-code-610c502ccf39
+- https://davidfeng.us/2019/01/clean-code/
