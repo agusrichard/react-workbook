@@ -1,70 +1,134 @@
-# Getting Started with Create React App
+# React Testing
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+</br>
 
-## Available Scripts
+## List of Contents:
+### 1. [How to Test React Components: the Complete Guide](#content-1)
 
-In the project directory, you can run:
+</br>
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Contents:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
 
-### `npm test`
+## [How to Test React Components: the Complete Guide](https://www.freecodecamp.org/news/testing-react-hooks/) <span id="content-1"></span>
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+</br >
 
-### `npm run build`
+## Theory:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### What is Testing?
+- Testing is a 3 step process that composed by this: (remember the 3 a's)
+  - Arrange
+  - Act
+  - Assert
+- Arrange: This is a step before the action takes place
+- Act: This is when the event happens or a function is called and returning a value
+- Assert: This is a step whether our expectation meets the actual event or return values
+- Snippet:
+  ```javascript
+  describe('Testing sum', () => {
+      function sum(a, b) {
+         return a + b;
+      }
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+      it('should equal 4',()=>{
+         expect(sum(2,2)).toBe(4);
+        })
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+      test('also should equal 4', () => {
+          expect(sum(2,2)).toBe(4);
+        }) 
+  });
+  ```
+- `describe` is used to declare the test block or suite
+- `it` or `test` is used to write the actual test
 
-### `npm run eject`
+### Why test?
+- Testing is done to ensure that your app will work as intended
+- Having test will make our code robust and less error prone
+- Drawbacks:
+  - Time consuming
+  - Running actual scenarios would cost money (in CI for example)
+  - Need to be done correctly, or it would lead us to false positives or false negatives
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### What to test?
+- Should test the functionality of our code or app
+- Should mimic how it will be used by your end users
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### What not to test?
+- Philosophy by Kent C Dodds, we shouldn't test implementation details
+- No need to change const variables and third party libraries
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Author's personal philosophy on testing
+- Many integration tests
+- No snapshot tests
+- Few unit tests
+- Few end to end tests
+- It's easy to test implementation details with unit tests, especially shallow render
+- Integration tests should mock as little as possible
+- Do not test implementation details such as names of functions and variables.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Shallow vs mount
+- Mount actually executes the html, css and js code like a browser would, but does so in a simulated way.
+- Mount tests are still much slower than shallow tests.
+- Unmount or cleanup  the component after each test.
+- `mount/render` for integrations testing and `shallow` for unit testing
+- `shallow` does not render the child components and allows to test in isolation
+- Check this examples:
+  ```javascript
+  import React from 'react';
 
-## Learn More
+  const App = () => {
+    return (
+      <div> 
+        <ChildComponent /> 
+      </div> 
+    )
+  }
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  const ChildComponent = () => {
+    return (
+      <div>
+       <p> Child components</p>
+      </div>
+    )
+  }
+  ```
+- This is the DOM nodes when we are using `shallow`
+  ```html
+  <App>
+    <div> 
+      <ChildComponent /> 
+    </div>
+  </App> 
+  ```
+- This is the DOM nodes when we are using `mount`
+  ```html
+  <App>
+    <div> 
+      <ChildComponent> 
+        <div>
+         <p> Child components</p>
+        </div>
+      </ChildComponent>
+     </div>
+  </App> 
+  ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Unit vs Integration vs End to End
+- unit testing: testing an isolated part of your app, usually done in combination with shallow rendering. example: a component renders with the default props.
+- integration testing: testing if different parts work or integrate with each other. Usually done with mounting or rendering a component. example: test if a child component can update context state in a parent.
+- e to e testing: Stands for end to end. Usually a multi step test combining multiple unit and integration tests into one big test. Usually very little is mocked or stubbed. Tests are done in a simulated browser, there may or may not be a UI while the test is running. example: testing an entire authentication flow.
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### SnapShot testing
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+</br>
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## References:
+- https://www.freecodecamp.org/news/testing-react-hooks/
