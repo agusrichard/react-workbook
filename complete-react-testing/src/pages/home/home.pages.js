@@ -1,6 +1,13 @@
+import Card from '../../components/card'
+
 const Home = () => {
   return (
-    <div>This is a home page</div>
+    <div>
+      <h1>Home Page</h1>
+      <div>
+        <Card />
+      </div>
+    </div>
   )
 }
 

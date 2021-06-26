@@ -124,7 +124,92 @@
 
 
 ### SnapShot testing
+- Snippet
+  ```javascript
+  import { mount } from 'enzyme'
+  import toJson from 'enzyme-to-json'
+  import { BrowserRouter as Router } from 'react-router-dom'
 
+
+  import Navbar from '../navbar.components'
+
+  it('Snapshot navbar', () => {
+
+    const wrapper = mount(
+      <Router>
+        <Navbar />
+      </Router>
+    )
+    console.log(wrapper.debug())
+
+    expect(toJson(wrapper)).toMatchSnapshot()
+  })
+  ```
+- If we haven't created `__snapshots__` before, it will create the folder for us
+- On every subsequent test the new snapshot will be compared to the existing snapshot file. 
+- The test will pass if the snapshot has not changed and fail if it has changed
+- The downside of doing snapshot test is if we deliberately change a component, our snapshot tests will fail. But still, we can update the snapshot
+- If we run `npm test` by default the tests are running in watch mode.
+- Press `u` in watch mode to update the snapshots
+- Snatshot test allows us to see how our component has changed since the last test
+- The benefits:
+  - It's very quick to implement
+  - To see if our component renders correctly
+- Use `.debug()` to get the string representation of a component
+- Cons and arguments of snapshot testing:
+  - Also comparing diffs can be done with git version control. This should not be the job of snapshot testing.
+  - A failed test doesn’t mean your app isn’t working as intended, only that your code has changed since the last time you ran the test.
+
+
+### Testing Implementation details with Enzyme
+- Snippet by the author
+  ```javascript
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import Counter from '../counter';
+
+  import Enzyme, { shallow, render, mount } from 'enzyme';
+  import toJson from 'enzyme-to-json';
+  import Adapter from 'enzyme-adapter-react-16';
+
+  Enzyme.configure({ adapter: new Adapter() })
+
+  // incorrect function assignment in the onClick method
+  // will still pass the tests.
+
+  test('the increment method increments count', () => {
+    const wrapper = mount(<Counter />)
+
+    expect(wrapper.instance().state.count).toBe(0)
+
+    // wrapper.find('button.counter-button').simulate('click')
+    // wrapper.setState({count: 1})
+    wrapper.instance().increment()
+    expect(wrapper.instance().state.count).toBe(1)
+  })
+  ```
+- My own snippet
+  ```javascript
+  import { mount } from 'enzyme'
+
+  import Card from '../card.components'
+
+  it('Test the card default', () => {
+    const wrapper = mount(<Card />)
+
+    expect(wrapper.props().title).toBe('Title')
+    expect(wrapper.props().description).toBe('Description')
+  })
+
+  it('Test after click', () => {
+    const wrapper = mount(<Card />)
+
+    const btn = wrapper.find('button')
+    btn.simulate('click')
+    const myLoveText = wrapper.find('#detective')
+    expect(myLoveText.text()).toBe('Sherlock Holmes and John Watson')
+  })
+  ```
 
 </br>
 

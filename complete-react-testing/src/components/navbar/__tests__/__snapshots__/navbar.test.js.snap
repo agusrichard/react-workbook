@@ -1,0 +1,156 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot navbar 1`] = `
+<BrowserRouter>
+  <Router
+    history={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "createHref": [Function],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <Navbar>
+      <styled.nav>
+        <nav
+          className="sc-gKAaRy kvcYfn"
+        >
+          <ul>
+            <NavList>
+              <styled.li
+                key="0"
+              >
+                <li
+                  className="sc-iCoGMd cKjKIQ"
+                >
+                  <Link
+                    to="/home"
+                  >
+                    <LinkAnchor
+                      href="/home"
+                      navigate={[Function]}
+                    >
+                      <a
+                        href="/home"
+                        onClick={[Function]}
+                      >
+                        Home
+                      </a>
+                    </LinkAnchor>
+                  </Link>
+                </li>
+              </styled.li>
+              <styled.li
+                key="1"
+              >
+                <li
+                  className="sc-iCoGMd cKjKIQ"
+                >
+                  <Link
+                    to="/about"
+                  >
+                    <LinkAnchor
+                      href="/about"
+                      navigate={[Function]}
+                    >
+                      <a
+                        href="/about"
+                        onClick={[Function]}
+                      >
+                        About
+                      </a>
+                    </LinkAnchor>
+                  </Link>
+                </li>
+              </styled.li>
+              <styled.li
+                key="2"
+              >
+                <li
+                  className="sc-iCoGMd cKjKIQ"
+                >
+                  <Link
+                    to="/blog"
+                  >
+                    <LinkAnchor
+                      href="/blog"
+                      navigate={[Function]}
+                    >
+                      <a
+                        href="/blog"
+                        onClick={[Function]}
+                      >
+                        Blog
+                      </a>
+                    </LinkAnchor>
+                  </Link>
+                </li>
+              </styled.li>
+              <styled.li
+                key="3"
+              >
+                <li
+                  className="sc-iCoGMd cKjKIQ"
+                >
+                  <Link
+                    to="/project"
+                  >
+                    <LinkAnchor
+                      href="/project"
+                      navigate={[Function]}
+                    >
+                      <a
+                        href="/project"
+                        onClick={[Function]}
+                      >
+                        Project
+                      </a>
+                    </LinkAnchor>
+                  </Link>
+                </li>
+              </styled.li>
+              <styled.li
+                key="4"
+              >
+                <li
+                  className="sc-iCoGMd cKjKIQ"
+                >
+                  <Link
+                    to="/contact"
+                  >
+                    <LinkAnchor
+                      href="/contact"
+                      navigate={[Function]}
+                    >
+                      <a
+                        href="/contact"
+                        onClick={[Function]}
+                      >
+                        Contact
+                      </a>
+                    </LinkAnchor>
+                  </Link>
+                </li>
+              </styled.li>
+            </NavList>
+          </ul>
+        </nav>
+      </styled.nav>
+    </Navbar>
+  </Router>
+</BrowserRouter>
+`;
