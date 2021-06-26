@@ -628,6 +628,79 @@
 
 ### useEffect and API requests with axios
 - A mock is way to simulate behavior we dont actually want to do in our tests. For example we mock API requests because we dont want to make real requests in our tests.
+- Author's snippet
+  ```javascript
+  // Parent
+  ...
+       <TestAxios url='https://jsonplaceholder.typicode.com/posts/1' />   
+  ...
+
+  // Component 
+  import React, { useState, useEffect } from 'react';
+  import axios from 'axios';
+
+
+  const TestAxios = (props) => {
+    const [state, setState] = useState()
+
+    useEffect(() => {
+      axios.get(props.url)
+        .then(res => setState(res.data))
+    }, [])
+
+
+    return (
+      <div>
+      <h1> Axios Test </h1>
+          {state
+            ? <p data-testid="title">{state.title}</p>
+            : <p>...Loading</p>}
+      </div>
+    )
+  }
+
+
+  export default TestAxios;
+
+  // Imports on test file
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import TestAxios from '../test_axios.js';
+  import {act, render, fireEvent, cleanup, waitForElement} from '@testing-library/react';
+
+  import axiosMock from "axios";
+
+
+  // __mocks__/axios.js
+  export default {
+    get: jest.fn(() => Promise.resolve({ data: {} }) )
+  };
+
+  // Test
+  //imports
+  ...
+
+  afterEach(cleanup)
+
+  it('Async axios request works', async () => {
+    axiosMock.get.mockResolvedValue({data: { title: 'some title' } })
+
+    const url = 'https://jsonplaceholder.typicode.com/posts/1'
+    const { getByText, getByTestId, rerender } = render(<TestAxios url={url} />);
+
+    expect(getByText(/...Loading/i).textContent).toBe("...Loading")
+
+    const resolvedEl = await waitForElement(() => getByTestId("title"));
+
+    expect((resolvedEl).textContent).toBe("some title")
+
+    expect(axiosMock.get).toHaveBeenCalledTimes(1);
+    expect(axiosMock.get).toHaveBeenCalledWith(url);
+   })
+  ```
+- The first thing we do in our test is call our fake axios get request, and mock the resolved value with ironically the mockResolvedValue function offered by jest. This function does exactly what its name says, it resolves a promise with the data we pass in, which simulates what axios does.
+- The waitForElement()  function, which will wait until the promise resolves before going to the next assertion.
+  
 
 </br>
 
