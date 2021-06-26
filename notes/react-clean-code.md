@@ -776,6 +776,122 @@ export default function App() {
 ## [Clean Code saves Devs. The Caffeina approach to ReactJS](https://developers.caffeina.com/clean-code-saves-devs-the-caffeina-approach-to-reactjs-1b56ad15aa64) <span id="content-6"></span>
 
 
+Questions to be asked before doing the pull requestL
+- Have I removed all the zombie code?
+- Will anyone else be able to understand this code in six months?
+- Is it necessary a refactoring that I can not do for reasons of time / information and I have to declare it?
+
+> In simpler terms, write code that you would be proud to take home and show your mother.
+
+### Clean code is self-commenting
+- Self-commenting code leads us to have some necessity to write comments. Since our code is self-commenting, why would we have to bother to write comments.
+- Naming boolean variables, should start with 'is', 'has', or 'should'
+- Make functions as small as possible. It's easier to read, maintain, and test.
+- We have to name our functions by what they do, not how they do it
+- Event function should have the name of the event
+  ```javascript
+  // Bad
+  const goToNextPage = () => {...}
+  <Button onClick={goToNextPage} />
+
+  // Better
+  const onNextClick = () => {...}
+  <Button onClick={onNextClick} />
+  ```
+- Declare prop types to make us understand what went wrong
+  ```javascript
+  const Box = () => {...}
+
+  Box.propTypes = {
+    onClick: PropTypes.func,
+    data: PropTypes.object
+  }
+  ```
+
+### Clean code is DRY
+- DRY code removes redundancy and repetition
+
+```javascript
+// Bad
+const BadComponent = () => {
+  return (
+    <div>
+      <input type="text" className="input" />
+      <input type="number" className="input" />
+    <div>
+  )
+}
+
+
+// Good
+const Input = ({ type }) => (
+  <input type={type} className="input" />
+)
+
+const GoodComponent = () => {
+  return (
+    <div>
+      <input type="text" className="input" />
+      <input type="number" className="input" />
+    <div>
+  )
+}
+```
+
+### Clean code have default values
+```javascript
+// Bad
+const Input = ({ type }) => (
+  <input type={type} className="input" />
+)
+
+// Good
+const Input = ({ type = 'text' }) => (
+  <input type={type} className="input" />
+)
+
+// Awesome
+const Input = ({ type }) => (
+  <input type={type} className="input" />
+)
+
+Input.defaultProps = {
+  type: 'text'
+}
+
+```
+
+### Clean code is small and declarative
+- Destructuring would be a handy to handle indexing object and array
+
+```javascript
+// Rest/Spread
+const Component = ({ className, ...others }) => (
+  <div className={className}>
+    <OtherComponent {...others}>  
+  </div>
+)
+
+// Array destructuring
+const [language, country] = locale.split('-')
+```
+
+### Clean code respect a logic
+- Respect React life cycle by understanding how to use it properly
+- This is the example using class-based components
+  ![React life cycle](https://miro.medium.com/max/700/1*tJndnmiNMKGdRFKYHkrvGw.png)
+
+### Clean code avoid side effects
+- In JavaScript, primitives are passed by values and object/arrays are passed by reference
+- State in JS should be immutable, and only should be changed with setState
+
+### Clean code is isolable and testable
+- Each component must be able to be used alone and can be tested independently.
+
+
+An intermezzo (eventhough this is the last part of the article)
+![An intermezzo](https://miro.medium.com/max/500/1*5RhyUqWmrXugwrjchoA5rA.jpeg)
+
 </br>
 
 ---
