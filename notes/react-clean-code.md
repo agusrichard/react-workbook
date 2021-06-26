@@ -8,11 +8,15 @@
 ### 3. [Clean Code in React](#content-3)
 ### 4. [React Patterns — Writing Clean Code](#content-4)
 ### 5. [Writing Clean React Code](#content-5)
+### 6. [Clean Code saves Devs. The Caffeina approach to ReactJS](#content-6)
 
 </br>
-</br>
+
+---
 
 ## Contents
+
+</br>
 
 ## [How to Write Cleaner React Code](https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/) <span id="content-1"><span>
 
@@ -294,6 +298,10 @@ function Navbar({ title }) {
 - Another essential pattern to employ for your React projects (especially if you have common properties that you want to reuse across your components, and you find yourself writing lots of duplicate props) is to use React Context.
 - For example, if we wanted to share user data across multiple components, instead of multiple repeat props (a pattern called props drilling), we could use the context feature that's built into the React library.
 
+</br>
+
+---
+
 ## [React Clean Code](https://betterprogramming.pub/8-ways-to-write-clean-react-code-610c502ccf39) <span id="content-2"><span>
 
 This is basically a suggesstion that we need to follow consciously.
@@ -482,6 +490,10 @@ const toggleButton = () => setIsDisabled(!isDisabled)
 const toggleButton = () => setIsDisabled(isDisabled => !isDisabled)
 ```
 
+</br>
+
+---
+
 ## [Clean Code in React](https://davidfeng.us/2019/01/clean-code/) <span id="content-3"><span>
 
 > Any fool can write code that a computer can understand. Good programmers write code that humans can understand.
@@ -623,6 +635,9 @@ Home.propTypes = {
 
 ### Use more descriptive names
 
+</br>
+
+---
 
 ## [React Patterns — Writing Clean Code](https://javascript.plainenglish.io/react-patterns-writing-clean-code-9535f211a6a9) <span id="content-4"><span>
 
@@ -656,6 +671,10 @@ If a component has many properties, it's better to write them on their own line.
 
 ### Loops
 - Use map to render a list of objects
+
+</br>
+
+---
 
 ## [Writing Clean React Code](https://levelup.gitconnected.com/writing-clean-react-code-74b42f9cc70c) <span id="content-5"><span>
 
@@ -750,6 +769,17 @@ export default function App() {
 }
 ```
 
+</br>
+
+---
+
+## [Clean Code saves Devs. The Caffeina approach to ReactJS](https://developers.caffeina.com/clean-code-saves-devs-the-caffeina-approach-to-reactjs-1b56ad15aa64) <span id="content-6"></span>
+
+
+</br>
+
+---
+
 
 ## References:
 - https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/
@@ -757,3 +787,4 @@ export default function App() {
 - https://davidfeng.us/2019/01/clean-code/
 - https://javascript.plainenglish.io/react-patterns-writing-clean-code-9535f211a6a9
 - https://levelup.gitconnected.com/writing-clean-react-code-74b42f9cc70c
+- https://developers.caffeina.com/clean-code-saves-devs-the-caffeina-approach-to-reactjs-1b56ad15aa64

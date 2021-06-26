@@ -7,7 +7,8 @@
 
 
 </br>
-</br>
+
+---
 
 ## Contents
 
@@ -39,6 +40,10 @@
 - Stateful and Stateless. </br>
   Some components use React setState() method and some don’t. While container components tend to be stateful and presentational components tend to be stateless, this is not a hard rule. Presentational components can be stateful, and containers can be stateless too.
 
+
+</br>
+
+---
 
 ## References:
 - https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0

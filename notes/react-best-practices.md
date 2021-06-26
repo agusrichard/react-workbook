@@ -8,7 +8,8 @@
 ### 3. [Clean Code vs. Dirty Code: React Best Practices](#content-3)
 
 </br>
-</br>
+
+---
 
 ## Contents
 
@@ -56,6 +57,9 @@
 
 ### 15. Follow linting rules, break up lines that are too long
 
+</br>
+
+---
 
 ## [21 Best Practices for a Clean React Project](https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb) <span id="content-2"><span>
 
@@ -387,6 +391,10 @@ const onClickHandler = () => {
 ### 21. Alt Prop
 - Always include alt prop for `<img/>` tags.
 
+</br>
+
+---
+
 
 ## [Clean Code vs. Dirty Code: React Best Practices](https://americanexpress.io/clean-code-dirty-code/) <span id="content-3"><span>
 
@@ -599,6 +607,10 @@ const onClickHandler = () => {
   // Clean
   const [language, country] = locale.split('-');
   ```
+
+</br>
+
+---
 
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
