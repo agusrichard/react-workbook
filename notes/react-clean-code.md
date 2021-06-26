@@ -1,6 +1,20 @@
 # React Clean Code
 
-## [How to Write Cleaner React Code](https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/)
+</br>
+
+## List of Contents:
+### 1. [How to Write Cleaner React Code](#content-1)
+### 2. [React Clean Code](#content-2)
+### 3. [Clean Code in React](#content-3)
+### 4. [React Patterns — Writing Clean Code](#content-4)
+### 5. [Writing Clean React Code](#content-5)
+
+</br>
+</br>
+
+## Contents
+
+## [How to Write Cleaner React Code](https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/) <span id="content-1"><span>
 
 ### 1. Make use of JSX shorthands
 
@@ -280,7 +294,7 @@ function Navbar({ title }) {
 - Another essential pattern to employ for your React projects (especially if you have common properties that you want to reuse across your components, and you find yourself writing lots of duplicate props) is to use React Context.
 - For example, if we wanted to share user data across multiple components, instead of multiple repeat props (a pattern called props drilling), we could use the context feature that's built into the React library.
 
-## [React Clean Code](https://betterprogramming.pub/8-ways-to-write-clean-react-code-610c502ccf39)
+## [React Clean Code](https://betterprogramming.pub/8-ways-to-write-clean-react-code-610c502ccf39) <span id="content-2"><span>
 
 This is basically a suggesstion that we need to follow consciously.
 
@@ -468,7 +482,7 @@ const toggleButton = () => setIsDisabled(!isDisabled)
 const toggleButton = () => setIsDisabled(isDisabled => !isDisabled)
 ```
 
-## [Clean Code in React](https://davidfeng.us/2019/01/clean-code/)
+## [Clean Code in React](https://davidfeng.us/2019/01/clean-code/) <span id="content-3"><span>
 
 > Any fool can write code that a computer can understand. Good programmers write code that humans can understand.
 
@@ -609,7 +623,137 @@ Home.propTypes = {
 
 ### Use more descriptive names
 
+
+## [React Patterns — Writing Clean Code](https://javascript.plainenglish.io/react-patterns-writing-clean-code-9535f211a6a9) <span id="content-4"><span>
+
+> Disclaimer: After I read this article, it seems like the author is a Vue developer and want to implement the same thing to React, which is not that good in my opinion. So use this summary with caution
+
+### Multi-Properties
+
+If a component has many properties, it's better to write them on their own line.
+```javascript
+<Content
+ foo="bar"
+ anotherProp="baz"
+ onClick={this.handleClick}
+/>
+```
+
+
+### Conditionals
+- When involving a question to render a component or not based on some boolean variable, better to use this
+  ```javascript
+  <div>
+   {isLoggedIn && <LogoutLink />}
+  </div>
+  ```
+- When involving a yes-no to render two components, use this
+  ```javascript
+  <div>
+    {isLoggedIn ? <LogoutLink /> : <LoginLink />}
+  </div>
+  ```
+
+### Loops
+- Use map to render a list of objects
+
+## [Writing Clean React Code](https://levelup.gitconnected.com/writing-clean-react-code-74b42f9cc70c) <span id="content-5"><span>
+
+### Make React Components as Short as Possible
+- Short component will lead to easier to read and maintain
+```javascript
+import React, { useState, useEffect } from "react";
+const getPerson = async () => {
+  const res = await fetch("https://api.agify.io?name=michael");
+  return res.json();
+};
+const Person = () => {
+  const [person, setPerson] = useState({});
+  const getData = async () => {
+    const p = await getPerson();
+    setPerson(p);
+  };
+  useEffect(() => {
+    getData();
+  }, []);
+  return <p>{person.name}</p>;
+};
+export default function App() {
+  return (
+    <div className="App">
+      <Person />
+    </div>
+  );
+}
+```
+
+### Components Which are at the Same Level of Abstraction Should be Together
+- This point basically tells us that there is a place to gather all smaller components. All this smaller components are at the same level.
+```javascript
+import React from "react";
+const Menu = () => {
+  return (
+    <div>
+      <button>Save</button>
+      <button>Close</button>
+    </div>
+  );
+};
+const TextEditor = () => {
+  return <textarea />;
+};
+export default function App() {
+  return (
+    <div className="App">
+      <Menu />
+      <TextEditor />
+    </div>
+  );
+}
+```
+
+### Reduce the Number of Props to a Minimum
+- Just like any functions, we should keep the number of parameters to as small as possible.
+```javascript
+// Not Good
+import React from "react";
+const Greeting = ({ greeting, firstName, lastName }) => {
+  return (
+    <div>
+      {greeting}, {firstName} {lastName}
+    </div>
+  );
+};
+export default function App() {
+  return (
+    <div className="App">
+      <Greeting greeting="hello" firstName="jane" lastName="smith" />
+    </div>
+  );
+}
+
+// Better
+import React from "react";
+const Greeting = ({ greeting, firstName, lastName }) => {
+  return (
+    <div>
+      {greeting}, {firstName} {lastName}
+    </div>
+  );
+};
+export default function App() {
+  return (
+    <div className="App">
+      <Greeting greeting="hello" firstName="jane" lastName="smith" />
+    </div>
+  );
+}
+```
+
+
 ## References:
 - https://www.freecodecamp.org/news/how-to-write-cleaner-react-code/
 - https://betterprogramming.pub/8-ways-to-write-clean-react-code-610c502ccf39
 - https://davidfeng.us/2019/01/clean-code/
+- https://javascript.plainenglish.io/react-patterns-writing-clean-code-9535f211a6a9
+- https://levelup.gitconnected.com/writing-clean-react-code-74b42f9cc70c

@@ -1,6 +1,18 @@
 # React Best Practices
 
-## [15 React Best Practices You Need to Follow in 2021](https://www.codeinwp.com/blog/react-best-practices/)
+</br>
+
+## List of Contents:
+### 1. [15 React Best Practices You Need to Follow in 2021](#content-1)
+### 2. [21 Best Practices for a Clean React Project](#content-2)
+### 3. [Clean Code vs. Dirty Code: React Best Practices](#content-3)
+
+</br>
+</br>
+
+## Contents
+
+## [15 React Best Practices You Need to Follow in 2021](https://www.codeinwp.com/blog/react-best-practices/) <span id="content-1"><span>
 
 ### 1. Keep components small and function-specific
 - Make our component small
@@ -45,8 +57,7 @@
 ### 15. Follow linting rules, break up lines that are too long
 
 
-## [21 Best Practices for a Clean React Project](https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb)
-
+## [21 Best Practices for a Clean React Project](https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb) <span id="content-2"><span>
 
 ### 1. Use JSX ShortHand
 ```javascript
@@ -377,7 +388,7 @@ const onClickHandler = () => {
 - Always include alt prop for `<img/>` tags.
 
 
-## [Clean Code vs. Dirty Code: React Best Practices](https://americanexpress.io/clean-code-dirty-code/)
+## [Clean Code vs. Dirty Code: React Best Practices](https://americanexpress.io/clean-code-dirty-code/) <span id="content-3"><span>
 
 ### Theory
 
