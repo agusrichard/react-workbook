@@ -612,7 +612,75 @@ const onClickHandler = () => {
 
 ---
 
+
+## [React Best Practices](https://dev.to/awedis/react-best-practices-4l4m)
+
+### Separate logic from JSX
+
+Instead of writing the javascript logic inline, it's better to put it somewhere else before the return statement
+
+```javascript
+import React from 'react';
+
+function Todo() {
+  let condition = true;
+
+  const addHandler = () => {
+    if (condition) {
+      //do api call
+    }
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => addHandler()}
+      >Add</button>
+    </div>
+  )
+}
+
+export default Todo;
+```
+
+### Split into small components and make the reusable
+
+This is obviously a self-explained statement
+
+### Hooks and Functional Components
+
+- No more 'this'
+- Fewer lines of code
+- Easier to debug, test and refactor
+
+### Styled-Components
+```javascript
+// The component
+import React from 'react';
+import { Text } from './SubTitle.styled';
+
+function SubTitle() {
+  return (
+    <Text>Hello</Text>
+  )
+}
+export default SubTitle;
+
+// The styling
+import styled from "styled-components";
+
+export const Text = styled.span`
+  color: #AAA;
+  font-size: 20px;
+`;
+```
+
+</br>
+
+---
+
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
 - https://americanexpress.io/clean-code-dirty-code/
+- https://dev.to/awedis/react-best-practices-4l4m
