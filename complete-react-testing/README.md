@@ -206,10 +206,428 @@
 
     const btn = wrapper.find('button')
     btn.simulate('click')
-    const myLoveText = wrapper.find('#detective')
-    expect(myLoveText.text()).toBe('Sherlock Holmes and John Watson')
+    const myText = wrapper.find('#detective')
+    expect(myText.text()).toBe('Sherlock Holmes and John Watson')
   })
   ```
+
+### React-testing-library
+
+> The more your tests resemble the way your software is used the more confidence they can give you.
+
+#### useState
+
+- Author's snippet:
+  ```javascript
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import TestHook from '../test_hook.js';
+  import {render, fireEvent, cleanup} from '@testing-library/react';
+  import App from '../../../App'
+
+  afterEach(cleanup)
+
+  it('Text in state is changed when button clicked', () => {
+      const { getByText } = render(<TestHook />);
+
+      expect(getByText(/Initial/i).textContent).toBe("Initial State")
+
+      fireEvent.click(getByText("State Change Button"))
+
+      expect(getByText(/Initial/i).textContent).toBe("Initial State Changed")
+   })
+
+
+  it('button click changes props', () => {
+    const { getByText } = render(<App>
+                                  <TestHook />
+                                 </App>)
+
+    expect(getByText(/Moe/i).textContent).toBe("Moe")
+
+    fireEvent.click(getByText("Change Name"))
+
+    expect(getByText(/Steve/i).textContent).toBe("Steve")
+  })
+  ```
+- My snippet
+  ```javascript
+  import { render, cleanup, fireEvent } from '@testing-library/react'
+
+  afterEach(cleanup)
+
+  it('Test with react testing library', () => {
+    const { getByText } = render(<Card />)
+
+    expect(getByText(/Title/)).toBeInTheDocument()
+    expect(getByText(/Description/)).toBeInTheDocument()
+
+    const btn = getByText('Click')
+    fireEvent.click(btn)
+    expect(getByText('Sherlock Holmes and John Watson')).toBeInTheDocument()
+    expect(getByText('Sherlock Holmes and John Watson').textContent).toBe('Sherlock Holmes and John Watson')
+  })
+  ```
+- `afterEach(cleanup)` This line is used to unmount or clean up after every test
+- `getByText` looks up for any component with some specified text
+
+
+#### useReducer
+- Author's snippet
+  ```javascript
+  // Reducer
+  import * as ACTIONS from './actions'
+
+  export const initialState = {
+      stateprop1: false,
+  }
+
+  export const Reducer1 = (state = initialState, action) => {
+    switch(action.type) {
+      case "SUCCESS":
+        return {
+          ...state,
+          stateprop1: true,
+        }
+      case "FAILURE":
+        return {
+          ...state,
+          stateprop1: false,
+        }
+      default:
+        return state
+    }
+  }
+
+  // Actions
+  export const SUCCESS = {
+    type: 'SUCCESS'
+  }
+
+  export const FAILURE = {
+    type: 'FAILURE'
+  }
+
+  // Component
+  import React, { useReducer } from 'react';
+  import * as ACTIONS from '../store/actions'
+  import * as Reducer from '../store/reducer'
+
+
+  const TestHookReducer = () => {
+    const [reducerState, dispatch] = useReducer(Reducer.Reducer1, Reducer.initialState)
+
+    const dispatchActionSuccess = () => {
+      dispatch(ACTIONS.SUCCESS)
+    }
+
+    const dispatchActionFailure = () => {
+      dispatch(ACTIONS.FAILURE)
+    }
+
+
+    return (
+      <div>
+         <div>
+          {reducerState.stateprop1
+             ? <p>stateprop1 is true</p>
+             : <p>stateprop1 is false</p>}
+         </div>
+         <button onClick={dispatchActionSuccess}>
+           Dispatch Success
+         </button>
+      </div>
+    )
+  }
+
+
+  export default TestHookReducer;
+
+  // Test
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import TestHookReducer from '../test_hook_reducer.js';
+  import {render, fireEvent, cleanup} from '@testing-library/react';
+  import * as Reducer from '../../store/reducer';
+  import * as ACTIONS from '../../store/actions';
+
+
+  afterEach(cleanup)
+
+  describe('test the reducer and actions', () => {
+    it('should return the initial state', () => {
+      expect(Reducer.initialState).toEqual({ stateprop1: false })
+    })
+
+    it('should change stateprop1 from false to true', () => {
+      expect(Reducer.Reducer1(Reducer.initialState, ACTIONS.SUCCESS ))
+        .toEqual({ stateprop1: true  })
+    })
+  })
+
+  it('Reducer changes stateprop1 from false to true', () => {
+     const { container, getByText } = render(<TestHookReducer />);
+
+     expect(getByText(/stateprop1 is/i).textContent).toBe("stateprop1 is false")
+
+     fireEvent.click(getByText("Dispatch Success"))
+
+     expect(getByText(/stateprop1 is/i).textContent).toBe("stateprop1 is true")
+  })
+  ```
+
+#### useContext
+- Author's snippet
+  ```javascript
+  // Context
+  import React from 'react';
+
+  const Context = React.createContext()
+
+  export default Context
+
+  // App.js
+  import React, { useState } from 'react';
+  import TestHookContext from './components/react-testing-lib/test_hook_context';
+
+
+  import Context from './components/store/context';
+
+
+  const App = () => {
+    const [state, setState] = useState("Some Text")
+    
+
+    const changeText = () => {
+      setState("Some Other Text")
+    }
+
+
+    return (
+      <div className="App">
+      <h1> Basic Hook useContext</h1>
+       <Context.Provider value={{changeTextProp: changeText,
+                                 stateProp: state
+                                   }} >
+          <TestHookContext />
+       </Context.Provider>
+      </div>
+    );
+  }
+
+  export default App;
+
+
+  // Component
+  import React, { useContext } from 'react';
+
+  import Context from '../store/context';
+
+  const TestHookContext = () => {
+    const context = useContext(Context)
+
+    return (
+      <div>
+      <button onClick={context.changeTextProp}>
+          Change Text
+      </button>
+        <p>{context.stateProp}</p>
+      </div>
+    )
+  }
+
+
+  export default TestHookContext;
+
+  // Test
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import TestHookContext from '../test_hook_context.js';
+  import {act, render, fireEvent, cleanup} from '@testing-library/react';
+  import App from '../../../App'
+
+  import Context from '../../store/context';
+
+  afterEach(cleanup)
+
+  it('Context value is updated by child component', () => {
+
+     const { container, getByText } = render(<App>
+                                              <Context.Provider>
+                                               <TestHookContext />
+                                              </Context.Provider>
+                                             </App>);
+
+     expect(getByText(/Some/i).textContent).toBe("Some Text")
+
+     fireEvent.click(getByText("Change Text"))
+
+     expect(getByText(/Some/i).textContent).toBe("Some Other Text")
+  })
+  ```
+
+### Controlled Component Forms
+- Author's snippet
+  ```javascript
+  // Component
+  import React, { useState } from 'react';
+
+  const HooksForm1 = () => {
+    const [valueChange, setValueChange] = useState('')
+    const [valueSubmit, setValueSubmit] = useState('')
+
+    const handleChange = (event) => (
+      setValueChange(event.target.value)
+    );
+
+    const handleSubmit = (event) => {
+      event.preventDefault();
+      setValueSubmit(event.target.text1.value)
+    };
+
+      return (
+        <div>
+         <h1> React Hooks Form </h1>
+          <form data-testid="form" onSubmit={handleSubmit}>
+            <label htmlFor="text1">Input Text:</label>
+            <input id="text1" onChange={handleChange} type="text" />
+            <button type="submit">Submit</button>
+          </form>
+          <h3>React State:</h3>
+            <p>Change: {valueChange}</p>
+            <p>Submit Value: {valueSubmit}</p>
+          <br />
+        </div>
+      )
+  }
+
+
+  export default HooksForm1;
+
+
+  // Test
+  import React from 'react';
+  import ReactDOM from 'react-dom';
+  import HooksForm1 from '../test_hook_form.js';
+  import {render, fireEvent, cleanup} from '@testing-library/react';
+
+  afterEach(cleanup)
+
+  //testing a controlled component form.
+  it('Inputing text updates the state', () => {
+      const { getByText, getByLabelText } = render(<HooksForm1 />);
+
+      expect(getByText(/Change/i).textContent).toBe("Change: ")
+
+      fireEvent.change(getByLabelText("Input Text:"), {target: {value: 'Text' } } )
+
+      expect(getByText(/Change/i).textContent).not.toBe("Change: ")
+   })
+
+
+   it('submiting a form works correctly', () => {
+       const { getByTestId, getByText } = render(<HooksForm1 />);
+
+       expect(getByText(/Submit Value/i).textContent).toBe("Submit Value: ")
+
+       fireEvent.submit(getByTestId("form"), {target: {text1: {value: 'Text' } } })
+
+       expect(getByText(/Submit Value/i).textContent).not.toBe("Submit Value: ")
+    })
+  ```
+- My snippet
+  ```javascript
+  // Component
+  import { useState } from 'react'
+
+  import { FormComponent, TextFieldComponent, FormItemWrapper, Button } from './form.styled'
+
+  const Form = () => {
+    const [age, setAge] = useState('')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [isSubmitted, setIsSubmitted] = useState(false)
+
+    const handleClick = (event) => {
+      setIsSubmitted(true)
+      event.preventDefault()
+    }
+
+    return (
+      <FormComponent>
+        <FormItemWrapper>
+          <TextFieldComponent
+            type="text"
+            value={username}
+            placeholder="Username"
+            onChange={(event) => setUsername(event.target.value)}
+          />
+        </FormItemWrapper>
+        <FormItemWrapper>
+          <TextFieldComponent
+            type="password"
+            value={password}
+            placeholder="Password"
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </FormItemWrapper>
+        <FormItemWrapper>
+          <TextFieldComponent
+            value={age}
+            type="number"
+            placeholder="Age"
+            onChange={(event) => setAge(event.target.value)}
+          />
+        </FormItemWrapper>
+        <div>
+          <Button onClick={handleClick}>Submit</Button>
+        </div>
+        {isSubmitted && (
+          <div>
+            <p>{username}</p>
+            <p>{password}</p>
+            <p>{age}</p>
+          </div>
+        )}
+      </FormComponent>
+    )
+  }
+
+  export default Form
+
+  // Test
+  import { render, fireEvent, cleanup, screen } from '@testing-library/react'
+
+  import Form from '../form.components'
+
+  afterEach(cleanup)
+
+  it('Test for placeholder', () => {
+    render(<Form />)
+
+    const usernameInput = screen.getByPlaceholderText(/Username/)
+    const passwordInput = screen.getByPlaceholderText(/Password/)
+    const ageInput = screen.getByPlaceholderText(/Age/)
+
+    expect(usernameInput).toBeInTheDocument()
+    expect(passwordInput).toBeInTheDocument()
+    expect(ageInput).toBeInTheDocument()
+
+    fireEvent.change(usernameInput, { target: { value: 'My Username' } })
+    fireEvent.change(passwordInput, { target: { value: 'My Password' } })
+    fireEvent.change(ageInput, { target: { value: 21 } })
+
+    const submitBtn = screen.getByText('Submit')
+    fireEvent.click(submitBtn)
+
+    expect(screen.getByText('My Username')).toBeInTheDocument()
+    expect(screen.getByText('My Password')).toBeInTheDocument()
+    expect(screen.getByText('21')).toBeInTheDocument()
+  })
+  ```
+
+### useEffect and API requests with axios
+- A mock is way to simulate behavior we dont actually want to do in our tests. For example we mock API requests because we dont want to make real requests in our tests.
 
 </br>
 

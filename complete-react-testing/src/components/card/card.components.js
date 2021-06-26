@@ -25,8 +25,8 @@ const Card = ({ title, description }) => {
       <Title>{title}</Title>
       <Description>{description}</Description>
       <Content>
-        <Surprise isActive={isActive} />
         <Button />
+        {isActive && <Surprise isActive={isActive} />}
       </Content>
     </Container>
   )
@@ -38,8 +38,8 @@ Card.defaultProps = {
 }
 
 Card.propTypes = {
-  title: PropTypes.string,
-  description: PropTypes.string,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
 }
 
 export default Card

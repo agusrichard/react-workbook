@@ -27,7 +27,7 @@ exports[`Snapshot navbar 1`] = `
     <Navbar>
       <styled.nav>
         <nav
-          className="sc-gKAaRy kvcYfn"
+          className="sc-jrsJWt brkpqe"
         >
           <ul>
             <NavList>
@@ -35,7 +35,7 @@ exports[`Snapshot navbar 1`] = `
                 key="0"
               >
                 <li
-                  className="sc-iCoGMd cKjKIQ"
+                  className="sc-kEqXSa kihOHy"
                 >
                   <Link
                     to="/home"
@@ -58,7 +58,7 @@ exports[`Snapshot navbar 1`] = `
                 key="1"
               >
                 <li
-                  className="sc-iCoGMd cKjKIQ"
+                  className="sc-kEqXSa kihOHy"
                 >
                   <Link
                     to="/about"
@@ -81,7 +81,7 @@ exports[`Snapshot navbar 1`] = `
                 key="2"
               >
                 <li
-                  className="sc-iCoGMd cKjKIQ"
+                  className="sc-kEqXSa kihOHy"
                 >
                   <Link
                     to="/blog"
@@ -104,7 +104,7 @@ exports[`Snapshot navbar 1`] = `
                 key="3"
               >
                 <li
-                  className="sc-iCoGMd cKjKIQ"
+                  className="sc-kEqXSa kihOHy"
                 >
                   <Link
                     to="/project"
@@ -127,7 +127,7 @@ exports[`Snapshot navbar 1`] = `
                 key="4"
               >
                 <li
-                  className="sc-iCoGMd cKjKIQ"
+                  className="sc-kEqXSa kihOHy"
                 >
                   <Link
                     to="/contact"
