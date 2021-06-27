@@ -19,6 +19,7 @@ const Form = () => {
         <TextFieldComponent
           type="text"
           value={username}
+          id="form-username"
           placeholder="Username"
           onChange={(event) => setUsername(event.target.value)}
         />
@@ -27,6 +28,7 @@ const Form = () => {
         <TextFieldComponent
           type="password"
           value={password}
+          id="form-password"
           placeholder="Password"
           onChange={(event) => setPassword(event.target.value)}
         />
@@ -35,12 +37,13 @@ const Form = () => {
         <TextFieldComponent
           value={age}
           type="number"
+          id="form-age"
           placeholder="Age"
           onChange={(event) => setAge(event.target.value)}
         />
       </FormItemWrapper>
       <div>
-        <Button onClick={handleClick}>Submit</Button>
+        <Button id="form-submit" onClick={handleClick}>Submit</Button>
       </div>
       {isSubmitted && (
         <div>

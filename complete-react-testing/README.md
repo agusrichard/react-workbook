@@ -701,6 +701,86 @@
 - The first thing we do in our test is call our fake axios get request, and mock the resolved value with ironically the mockResolvedValue function offered by jest. This function does exactly what its name says, it resolves a promise with the data we pass in, which simulates what axios does.
 - The waitForElement()  function, which will wait until the promise resolves before going to the next assertion.
   
+### Cypress
+- Installing: `npm install cypress`
+- To run: `node_modules/.bin/cypress open`
+- Running the cypress open command will give you a basic configuration of cypress and create some files and folders for your automatically. A cypress folder will be created in the project root. We will write our code in the integration folder.
+- No mocking, our app will be running in its full development version in a simulated browser with a UI
+- Unlike unit and integration tests we do not need to explicitly assert some things. This is because some Cypress commands have built in default assertions. Default assertions are exactly what they sound like, they are asserted by default so no need to add a matcher.
+- Commands are chained together so order is important and one command will wait until a previous command is completed before running.
+- We will make use of the `cy.contains()` command which will return a DOM node with matching text.
+- Author's snippet
+  ```javascript
+  import React from 'react';
+
+  describe ('complete e to e test', () => {
+    it('e to e test', () => {
+      cy.visit('/')
+      //counter test
+      cy.contains("Clicked: 0")
+        .click()
+      cy.contains("Clicked: 1")
+      // basic hooks test
+      cy.contains("Initial State")
+      cy.contains("State Change Button")
+        .click()
+      cy.contains("Initial State Changed")
+      cy.contains("Moe")
+      cy.contains("Change Name")
+        .click()
+      cy.contains("Steve")
+      //useReducer test
+      cy.contains('stateprop1 is false')
+      cy.contains('Dispatch Success')
+        .click()
+      cy.contains('stateprop1 is true')
+      //useContext test
+      cy.contains("Some Text")
+      cy.contains('Change Text')
+        .click()
+      cy.contains("Some Other Text")
+      //form test
+      cy.get('#text1')
+        .type('New Text {enter}')
+      cy.contains("Change: New Text")
+      cy.contains("Submit Value: New Text")
+      //axios test
+      cy.request('https://jsonplaceholder.typicode.com/posts/1')
+        .should(res => {
+            expect(res.body).not.to.be.null
+            cy.contains(res.body.title)
+          })
+    });
+  });
+  ```
+- My snippet
+  ```javascript
+  /* eslint-disable */
+
+  describe('End to end test', () => {
+    it('e2e test', () => {
+      cy.visit('/')
+
+      // Test for top part
+      cy.contains('Home').click()
+      cy.contains('Title')
+      cy.contains('Description')
+
+      // Test for click event
+      cy.contains('Click').click()
+      cy.contains('Sherlock Holmes and John Watson')
+
+      // Test for form
+      cy.get('#form-username').type('My Username')
+      cy.get('#form-password').type('My Password')
+      cy.get('#form-age').type('21')
+      cy.get('#form-submit').click()
+      cy.contains('My Username')
+      cy.contains('My Password')
+      cy.contains('21')
+    })
+  })
+  ```
 
 </br>
 
