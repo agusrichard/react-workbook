@@ -6,6 +6,7 @@
 ### 1. [How to Test React Components: the Complete Guide](#content-1)
 ### 2. [A Practical Guide To Testing React Applications With Jest](#content-2)
 ### 3. [React Testing Library – Tutorial with JavaScript Code Examples](#content-3)
+### 4. [React Testing Library Tutorial -- Net Ninja](#content-4)
 
 
 </br>
@@ -887,7 +888,14 @@ test("Test theme button toggle", () => {
 
 ---
 
+## [React Testing Library Tutorial -- Net Ninja](https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ) <span id="content-4"></span>
+
+</br>
+
+---
+
 ## References:
 - https://www.freecodecamp.org/news/testing-react-hooks/
 - https://www.smashingmagazine.com/2020/06/practical-guide-testing-react-applications-jest/
 - https://www.freecodecamp.org/news/react-testing-library-tutorial-javascript-example-code/
+- https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
