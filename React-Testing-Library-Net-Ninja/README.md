@@ -120,6 +120,14 @@
     expect(element).not.toBeInTheDocument()
   })
   ```
+- Common assertions (Most of them are quite self-explainable):
+  - toBe: to assert equality
+  - toBeTruthy: to assert that the value is truthy
+  - toBeVisible: to assert that our component is visible to the user, not just exists within the document
+  - toContainHTML: to assert that the element contain some element tag
+  - toHaveTextContent: to assert the text content of the element
+  - not: to negate the assertion method
+- `expect(element.textContent).toBe('Some text content')` could be used to assert the text content
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
