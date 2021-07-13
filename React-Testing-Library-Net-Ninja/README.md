@@ -134,6 +134,29 @@
     ...tests here
   })
   ```
+- `fireEvent` object:
+  - Change input value event: </br>
+    ```javascript
+    it('should change value of input component', () => {
+        render(<AddInput todos={[]} setTodos={mockedSetTodo} />)
+
+        const element = screen.getByPlaceholderText(/Add a new task here.../i)
+        fireEvent.change(element, { target: { value: 'Some todo here' } })
+        expect(element.value).toBe('Some todo here')
+    })
+    ```
+  - Button click event: </br>
+    ```javascript
+    it('should have empty input value after click the button', () => {
+        render(<AddInput todos={[]} setTodos={mockedSetTodo} />)
+
+        const inputElement = screen.getByPlaceholderText(/Add a new task here.../i)
+        fireEvent.change(inputElement, { target: { value: 'Some todo here' } })
+        const buttonElement = screen.getByText(/Add/i)
+        fireEvent.click(buttonElement)
+        expect(inputElement.value).toBe('')
+    })
+    ```
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
