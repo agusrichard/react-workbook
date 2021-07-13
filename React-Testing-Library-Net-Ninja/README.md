@@ -128,6 +128,12 @@
   - toHaveTextContent: to assert the text content of the element
   - not: to negate the assertion method
 - `expect(element.textContent).toBe('Some text content')` could be used to assert the text content
+- Using `describe` block to put similar tests into one suite
+  ```javascript
+  describe('Some description of suite', () => {
+    ...tests here
+  })
+  ```
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
