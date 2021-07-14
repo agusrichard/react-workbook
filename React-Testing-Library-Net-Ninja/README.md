@@ -158,6 +158,26 @@
     })
     ```
 - `toHaveClass` assertion to assert the class of a component
+  ```javascript
+  it('add one todo and assert the class of the todo component', () => {
+        render(<MockedTodo />)
+
+        const inputValue = 'My new todo'
+        addTodos([inputValue])
+
+        const todoElement = screen.getByText(inputValue)
+        expect(todoElement).not.toHaveClass('todo-item-active')
+  })
+  ```
+- Test with async snippet
+  ```javascript
+  it('should render follower', async () => {
+      render(<MockedFollowerList />)
+
+      const element = await screen.findByTestId(/follower-item-0/i)
+      expect(element).toBeInTheDocument()
+  })
+  ```
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
