@@ -5,6 +5,8 @@
 
 ## List of Contents:
 ### 1. [Understanding React Hooks](#content-1)
+### 2. [Official Docs - Introducing Hooks](#content-2)
+### 3. [Official Docs - Hooks at a Glance](#content-3)
 
 
 </br>
@@ -172,6 +174,204 @@ React Hooks are a way for your function components to “hook” into React’s 
   alert('Followed ' + props.user);
   ```
 
+</br>
+
+---
+
+## [Official Docs - Introducing Hooks](https://reactjs.org/docs/hooks-intro.html) <span id="content-2"><span>
+
+### Intro code snippet
+```javascript
+import React, { useState } from 'react';
+
+function Example() {
+  // Declare a new state variable, which we'll call "count"
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+### No Breaking Changes
+
+Note that hooks are:
+- **Completely opt-in**. You can try Hooks in a few components without rewriting any existing code.
+- **100% backwards-compatible**. Hooks don’t contain any breaking changes.
+- **Available now**. Hooks are now available with the release of v16.8.0.
+- **There are no plans to remove classes from React**
+- **Hooks don’t replace your knowledge of React concepts**. Instead, Hooks provide a more direct API to the React concepts you already know: props, state, context, refs, and lifecycle.
+
+### Motivation
+- **It’s hard to reuse stateful logic between components**
+  - Hard to create reusable behavior when using class-based component.
+  - Trapped in wrapper hell where components are surrounded by layers of providers, consumers, higher order components, render props and other abstractions.
+  - React needs a better primitive for sharing stateful logic.
+  - Hooks allow you to reuse stateful logic without changing your component hierarchy.
+- **Complex components become hard to understand**
+  - Mutually related code that changes together gets split apart, but completely unrelated code ends up combined in a single method. This makes it too easy to introduce bugs and inconsistencies.
+  - Hooks let you split one component into smaller functions based on what pieces are related (such as setting up a subscription or fetching data), rather than forcing a split based on lifecycle methods.
+- **Classes confuse both people and machines**
+  - You have to understand how this works in JavaScript, which is very different from how it works in most languages.
+  - You have to remember to bind the event handlers.
+  - Classes don’t minify very well, and they make hot reloading flaky and unreliable.
+
+### Gradual Adoption Strategy
+- **TLDR: There are no plans to remove classes from React.**
+- Crucially, Hooks work side-by-side with existing code so you can adopt them gradually
+
+</br>
+
+---
+
+## [Official Docs - Hooks at a Glance](https://reactjs.org/docs/hooks-intro.html) <span id="content-3"><span>
+
+### State Hook
+- Code snippet </br>
+  ```javascript
+  import React, { useState } from 'react';
+
+  function Example() {
+    // Declare a new state variable, which we'll call "count"
+    const [count, setCount] = useState(0);
+
+    return (
+      <div>
+        <p>You clicked {count} times</p>
+        <button onClick={() => setCount(count + 1)}>
+          Click me
+        </button>
+      </div>
+    );
+  }
+  ```
+- `useState` is a Hook.
+- `useState` returns a pair: the current state value and a function that lets you update it.
+- `count` and `setCount` can be compared to `this.setState` and `state` of a class-based component.
+- The only argument for `useState` method is the initial value for the state.
+- We can declare multiple Hook in a single component. </br>
+  ```javascript
+   function ExampleWithManyStates() {
+    // Declare multiple state variables!
+    const [age, setAge] = useState(42);
+    const [fruit, setFruit] = useState('banana');
+    const [todos, setTodos] = useState([{ text: 'Learn Hooks' }]);
+    // ...
+  }
+  ```
+- Hooks are functions that let you “hook into” React state and lifecycle features from function components. Hooks don’t work inside classes — they let you use React without classes.
+
+### Effect Hook
+- Data fetching, subscriptions, or manually changing the DOM are called as "side effects".
+- `useEffect` has the same ability as `componentDidUpdate`, `componentDidMount`, and `componentWillUnmount`
+- Code snippet: </br>
+  ```javascript
+  import React, { useState, useEffect } from 'react';
+
+  function Example() {
+    const [count, setCount] = useState(0);
+
+    // Similar to componentDidMount and componentDidUpdate:
+    useEffect(() => {
+      // Update the document title using the browser API
+      document.title = `You clicked ${count} times`;
+    });
+
+    return (
+      <div>
+        <p>You clicked {count} times</p>
+        <button onClick={() => setCount(count + 1)}>
+          Click me
+        </button>
+      </div>
+    );
+  }
+  ```
+- When you call useEffect, you’re telling React to run your “effect” function after flushing changes to the DOM.
+- Since `useEffect` is used inside the component, so it can use `state` and `setState`.
+- `useEffect` can be used to clean up the component </br>
+  ```javascript
+  import React, { useState, useEffect } from 'react';
+
+  function FriendStatus(props) {
+    const [isOnline, setIsOnline] = useState(null);
+
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    useEffect(() => {
+      ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+      return () => {
+        ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+      };
+    });
+
+    if (isOnline === null) {
+      return 'Loading...';
+    }
+    return isOnline ? 'Online' : 'Offline';
+  }
+  ```
+- In the above example, React will unsubscribe (calling ChatAPI.unsubscribeFromFriendStatus) when the component unmounts.
+- In a single component, we can have multiple `useEffect`.
+  
+### Rules of Hooks
+- Only call Hooks at the top level. Don’t call Hooks inside loops, conditions, or nested functions.
+- Only call Hooks from React function components. Don’t call Hooks from regular JavaScript functions.
+
+
+### Building Your Own Hooks
+- Solution to reuse some stateful logic between components:
+  - higher order components
+  - render props
+- The previous code snippet when using `useEffect` can be refactored into this: </br>
+  ```javascript
+  // Custom hook
+  import React, { useState, useEffect } from 'react';
+
+  function useFriendStatus(friendID) {
+    const [isOnline, setIsOnline] = useState(null);
+
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    useEffect(() => {
+      ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+      return () => {
+        ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
+      };
+    });
+
+    return isOnline;
+  }
+
+  // Usage
+  function FriendListItem(props) {
+    const isOnline = useFriendStatus(props.friend.id);
+
+    return (
+      <li style={{ color: isOnline ? 'green' : 'black' }}>
+        {props.friend.name}
+      </li>
+    );
+  }
+  ```
+- The state of each component is completely independent.
+- Each call to a Hook has a completely isolated state.
+- 
+
+</br>
+
+---
 
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
+- https://reactjs.org/docs/hooks-intro.html
