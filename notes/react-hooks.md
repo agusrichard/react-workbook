@@ -7,6 +7,7 @@
 ### 1. [Understanding React Hooks](#content-1)
 ### 2. [Official Docs - Introducing Hooks](#content-2)
 ### 3. [Official Docs - Hooks at a Glance](#content-3)
+### 4. [Official Docs - Using the State Hook](#content-4)
 
 
 </br>
@@ -224,13 +225,13 @@ Note that hooks are:
 
 ### Gradual Adoption Strategy
 - **TLDR: There are no plans to remove classes from React.**
-- Crucially, Hooks work side-by-side with existing code so you can adopt them gradually
+- Crucially, Hooks work side-by-side with existing code so you can adopt them gradually.
 
 </br>
 
 ---
 
-## [Official Docs - Hooks at a Glance](https://reactjs.org/docs/hooks-intro.html) <span id="content-3"><span>
+## [Official Docs - Hooks at a Glance](https://reactjs.org/docs/hooks-overview.html) <span id="content-3"><span>
 
 ### State Hook
 - Code snippet </br>
@@ -366,7 +367,154 @@ Note that hooks are:
   ```
 - The state of each component is completely independent.
 - Each call to a Hook has a completely isolated state.
-- 
+
+</br>
+
+---
+
+## [Official Docs - Using the State Hook](https://reactjs.org/docs/hooks-state.html) <span id="content-4"><span>
+
+### Intro
+- Functional component code snippet: </br>
+  ```javascript
+  import React, { useState } from 'react';
+
+  function Example() {
+    // Declare a new state variable, which we'll call "count"
+    const [count, setCount] = useState(0);
+
+    return (
+      <div>
+        <p>You clicked {count} times</p>
+        <button onClick={() => setCount(count + 1)}>
+          Click me
+        </button>
+      </div>
+    );
+  }
+  ```
+- Class component code snippet (equivalent example): </br>
+  ```javascript
+  class Example extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        count: 0
+      };
+    }
+
+    render() {
+      return (
+        <div>
+          <p>You clicked {this.state.count} times</p>
+          <button onClick={() => this.setState({ count: this.state.count + 1 })}>
+            Click me
+          </button>
+        </div>
+      );
+    }
+  }
+  ```
+
+### Hooks and Function Components
+- Code snippet: </br>
+  ```javascript
+  // Initialized
+  const Example = (props) => {
+    // You can use Hooks here!
+    return <div />;
+  }
+
+  // Declarative
+  function Example(props) {
+    // You can use Hooks here!
+    return <div />;
+  }
+  ```
+- Hooks don't work inside classes.
+
+### What's Hook?
+- **What is a Hook?** A Hook is a special function that lets you “hook into” React features.
+- **When would I use a Hook?** If we want to write a function component with state to it, then we need to use hook, especially the `useState` hook.
+
+### Declaring a State Variable
+- Code snippet comparison: </br>
+  ```javascript
+  // Class component
+  class Example extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        count: 0
+      };
+    }
+  }
+
+  // Functional component
+  import React, { useState } from 'react';
+
+  function Example() {
+    // Declare a new state variable, which we'll call "count"
+    const [count, setCount] = useState(0);
+  }
+  ```
+- **What does calling useState do?** It declares a “state variable”.
+- **What do we pass to useState as an argument?** The only argument to the useState() Hook is the initial state.
+- The only argument to the useState() Hook is the initial state.
+- **What does useState return?** It returns a pair of values: the current state and a function that updates it.
+- This is why we write const [count, setCount] = useState(). This is similar to this.state.count and this.setState in a class.
+- React will remember its current value between re-renders, and provide the most recent one to our function.
+
+### Reading State
+- Comparison of using state between class-based and functional: </br>
+  ```javascript
+  // Class-based
+  <p>You clicked {this.state.count} times</p>
+
+  // FUnctional
+  <p>You clicked {count} times</p>
+  ```
+
+### Updating State
+- Comparison of using state between class-based and functional: </br>
+  ```javascript
+  // Class-based
+  <button onClick={() => this.setState({ count: this.state.count + 1 })}>
+    Click me
+  </button>
+
+  // FUnctional
+  <button onClick={() => setCount(count + 1)}>
+    Click me
+  </button>
+  ```
+
+### Recap
+```javascript
+ 1:  import React, { useState } from 'react';
+ 2:
+ 3:  function Example() {
+ 4:    const [count, setCount] = useState(0);
+ 5:
+ 6:    return (
+ 7:      <div>
+ 8:        <p>You clicked {count} times</p>
+ 9:        <button onClick={() => setCount(count + 1)}>
+10:         Click me
+11:        </button>
+12:      </div>
+13:    );
+14:  }
+```
+- Line 1: We import the `useState` Hook from React. It lets us keep local state in a function component.
+- Line 4: `useState` returns a pair. One is the state and the other is the function to update the state. The only argument received by `useState` is the initial state.
+- Line 9: When the user clicks, we call setCount with a new value. React will then re-render the Example component, passing the new count value to it.
+
+### Tip: Using Multiple State Variables
+- Declaring state variables as a pair of [something, setSomething] is also handy because it lets us give different names to different state variables if we want to use more than one.
+- Unlike this.setState in a class, updating a state variable always replaces it instead of merging it.
+
+
 
 </br>
 
@@ -375,3 +523,5 @@ Note that hooks are:
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
+- https://reactjs.org/docs/hooks-overview.html
+- https://reactjs.org/docs/hooks-state.html

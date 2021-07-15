@@ -6,3 +6,4 @@
 ### 2. [React Best Practices](./react-best-practices.md)
 ### 3. [React Design Patterns](./react-design-patterns.md)
 ### 4. [React Hooks](./react-hooks.md)
+### 5. [React Testing](./react-testing.md)

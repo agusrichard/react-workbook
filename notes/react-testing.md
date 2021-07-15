@@ -986,6 +986,7 @@ test("Test theme button toggle", () => {
     const element = screen.getByTestId(/header/)
     expect(element).toBeInTheDocument()
   })
+  
   it('should render heading, search by get all', () => {
     render(<Header title='My Header' testId="header"/>)
 
