@@ -178,6 +178,47 @@
       expect(element).toBeInTheDocument()
   })
   ```
+- Several reasons why we have to mock API instead of using it:
+  - Requests cost money
+  - Requests are slow
+  - Our tests depend on something external
+- How to mock axios:
+  - Add jest settings: </br>
+    ```javascript
+    "jest": {
+      "collectCoverageFrom": [
+        "src/**/*.{js,jsx,ts,tsx}"
+      ],
+      "resetMocks": false
+    }
+    ```
+  - Mocking axios: </br>
+    ```javascript
+    const mockedResponse = {
+      data: {
+        results: [
+          {
+            name: {
+              first: "Sherlock",
+              last: "Holmes"
+            },
+            picture: {
+              large: 'https://randomuser.me/api/portraits/women/72.jpg'
+            },
+            login: {
+              username: 'SherlockHolmes'
+            }
+          }
+        ]
+      }
+    }
+
+    const mockedAxios = {
+      get: jest.fn().mockResolvedValue(mockedResponse)
+    }
+
+    export default mockedAxios
+    ```
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
