@@ -892,6 +892,12 @@ test("Test theme button toggle", () => {
 
 </br>
 
+Repo by the tutorial author: https://github.com/harblaith7/React-Testing-Library-Net-Ninja
+
+Tests written by me: https://github.com/agusrichard/react-workbook/tree/master/React-Testing-Library-Net-Ninja
+
+</br>
+
 - We can use `test` or `it` to write the tests.
 - We can use `describe` to write a suite of tests.
 - Inside test block:
@@ -986,7 +992,6 @@ test("Test theme button toggle", () => {
     const element = screen.getByTestId(/header/)
     expect(element).toBeInTheDocument()
   })
-  
   it('should render heading, search by get all', () => {
     render(<Header title='My Header' testId="header"/>)
 
@@ -1012,6 +1017,126 @@ test("Test theme button toggle", () => {
     expect(element).not.toBeInTheDocument()
   })
   ```
+- Common assertions (Most of them are quite self-explainable):
+  - toBe: to assert equality
+  - toBeTruthy: to assert that the value is truthy
+  - toBeVisible: to assert that our component is visible to the user, not just exists within the document
+  - toContainHTML: to assert that the element contain some element tag
+  - toHaveTextContent: to assert the text content of the element
+  - not: to negate the assertion method
+- `expect(element.textContent).toBe('Some text content')` could be used to assert the text content
+- Using `describe` block to put similar tests into one suite
+  ```javascript
+  describe('Some description of suite', () => {
+    ...tests here
+  })
+  ```
+- `fireEvent` object:
+  - Change input value event: </br>
+    ```javascript
+    it('should change value of input component', () => {
+        render(<AddInput todos={[]} setTodos={mockedSetTodo} />)
+
+        const element = screen.getByPlaceholderText(/Add a new task here.../i)
+        fireEvent.change(element, { target: { value: 'Some todo here' } })
+        expect(element.value).toBe('Some todo here')
+    })
+    ```
+  - Button click event: </br>
+    ```javascript
+    it('should have empty input value after click the button', () => {
+        render(<AddInput todos={[]} setTodos={mockedSetTodo} />)
+
+        const inputElement = screen.getByPlaceholderText(/Add a new task here.../i)
+        fireEvent.change(inputElement, { target: { value: 'Some todo here' } })
+        const buttonElement = screen.getByText(/Add/i)
+        fireEvent.click(buttonElement)
+        expect(inputElement.value).toBe('')
+    })
+    ```
+- `toHaveClass` assertion to assert the class of a component
+  ```javascript
+  it('add one todo and assert the class of the todo component', () => {
+        render(<MockedTodo />)
+
+        const inputValue = 'My new todo'
+        addTodos([inputValue])
+
+        const todoElement = screen.getByText(inputValue)
+        expect(todoElement).not.toHaveClass('todo-item-active')
+  })
+  ```
+- Test with async snippet
+  ```javascript
+  it('should render follower', async () => {
+      render(<MockedFollowerList />)
+
+      const element = await screen.findByTestId(/follower-item-0/i)
+      expect(element).toBeInTheDocument()
+  })
+  ```
+- Several reasons why we have to mock API instead of using it:
+  - Requests cost money
+  - Requests are slow
+  - Our tests depend on something external
+- How to mock axios:
+  - Add jest settings: </br>
+    ```javascript
+    "jest": {
+      "collectCoverageFrom": [
+        "src/**/*.{js,jsx,ts,tsx}"
+      ],
+      "resetMocks": false
+    }
+    ```
+  - Mocking axios: </br>
+    ```javascript
+    const mockedResponse = {
+      data: {
+        results: [
+          {
+            name: {
+              first: "Sherlock",
+              last: "Holmes"
+            },
+            picture: {
+              large: 'https://randomuser.me/api/portraits/women/72.jpg'
+            },
+            login: {
+              username: 'SherlockHolmes'
+            }
+          }
+        ]
+      }
+    }
+
+    const mockedAxios = {
+      get: jest.fn().mockResolvedValue(mockedResponse)
+    }
+
+    export default mockedAxios
+    ```
+- How to run run something before/after each or all tests.
+  - Doing some import: `import '@testing-library/jest-dom/extend-expect'`
+  - Call the function: </br>
+    ```javascript
+    beforeAll(() => {
+        console.log('Run before all tests')
+    })
+
+    beforeEach(() => {
+        console.log('Run before each test')
+    })
+
+    afterEach(() => {
+        console.log('Run after each test')
+    })
+
+    afterAll(() => {
+        console.log('Run after all tests')
+    })
+    ```
+
 
 
 </br>
@@ -1024,4 +1149,5 @@ test("Test theme button toggle", () => {
 - https://www.smashingmagazine.com/2020/06/practical-guide-testing-react-applications-jest/
 - https://www.freecodecamp.org/news/react-testing-library-tutorial-javascript-example-code/
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
+- https://github.com/harblaith7/React-Testing-Library-Net-Ninja
 - https://github.com/harblaith7/React-Testing-Library-Net-Ninja

@@ -1079,7 +1079,280 @@ function useFriendStatus(friendID) {
   }
   ```
 - When we select a different friend, we trigger the useEffect call, which means also trigger our custom hooks. So when the recepientID is changing, then the isRecipientOnline will change too.
-- 
+
+
+</br>
+
+---
+
+## [Official Docs - Hooks API Reference](https://reactjs.org/docs/hooks-reference.html) <span id="content-9"><span>
+
+### `useState`
+```javascript
+const [state, setState] = useState(initialState);
+```
+- Returns a stateful value, and a function to update it.
+- During the initial render, the returned state (state) is the same as the value passed as the first argument (initialState).
+- The setState function is used to update the state. It accepts a new state value and enqueues a re-render of the component.
+- During subsequent re-renders, the first value returned by useState will always be the most recent state after applying updates.
+- If the new state is computed using the previous state, you can pass a function to setState. </br>
+  ```javascript
+  function Counter({initialCount}) {
+    const [count, setCount] = useState(initialCount);
+    return (
+      <>
+        Count: {count}
+        <button onClick={() => setCount(initialCount)}>Reset</button>
+        <button onClick={() => setCount(prevCount => prevCount - 1)}>-</button>
+        <button onClick={() => setCount(prevCount => prevCount + 1)}>+</button>
+      </>
+    );
+  }
+  ```
+- Unlike the setState method found in class components, useState does not automatically merge update objects.
+- The initialState argument is the state used during the initial render. In subsequent renders, it is disregarded. 
+- If the initial state is the result of an expensive computation, you may provide a function instead, which will be executed only on the initial render: </br>
+  ```javascript
+  const [state, setState] = useState(() => {
+    const initialState = someExpensiveComputation(props);
+    return initialState;
+  });
+  ```
+- If you update a State Hook to the same value as the current state, React will bail out without rendering the children or firing effects.
+
+### `useEffect`
+- Accepts a function that contains imperative, possibly effectful code.
+- Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body of a function component (referred to as React’s render phase). Doing so will lead to confusing bugs and inconsistencies in the UI.
+- The function passed to useEffect will run after the render is committed to the screen.
+- By default, effects run after every completed render, but you can choose to fire them only when certain values have changed.
+- Cleaning up an effect </br>
+  ```javascript
+  useEffect(() => {
+    const subscription = props.source.subscribe();
+    return () => {
+      // Clean up the subscription
+      subscription.unsubscribe();
+    };
+  });
+  ```
+- Previous effect is cleaned up before executing the next effect.
+- If we want to use effect before the component get rendered to the screen, we can use `useLayoutEffect`.
+- Although useEffect is deferred until after the browser has painted, it’s guaranteed to fire before any new renders. React will always flush a previous render’s effects before starting a new update.
+- The default behavior for effects is to fire the effect after every completed render.
+- If we just want to re-render when some props or states changed, then we can provide the dependencies as the second argument of useEffect. </br>
+  ```javascript
+  useEffect(
+    () => {
+      const subscription = props.source.subscribe();
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [props.source],
+  );
+  ```
+  - Now, the effect will get called only when the props.source changes.
+
+### `useContext`
+```javascript
+const value = useContext(MyContext);
+```
+- Accepts a context object (the value returned from React.createContext) and returns the current context value for that context.
+- The current context value is determined by the value prop of the nearest <MyContext.Provider> above the calling component in the tree.
+- Don’t forget that the argument to useContext must be the context object itself:
+  - Correct: useContext(MyContext)
+  - Incorrect: useContext(MyContext.Consumer)
+  - Incorrect: useContext(MyContext.Provider)
+- A component calling useContext will always re-render when the context value changes.
+- Putting it together with Context.Provider: </br>
+  ```javascript
+  const themes = {
+    light: {
+      foreground: "#000000",
+      background: "#eeeeee"
+    },
+    dark: {
+      foreground: "#ffffff",
+      background: "#222222"
+    }
+  };
+
+  const ThemeContext = React.createContext(themes.light);
+
+  function App() {
+    return (
+      <ThemeContext.Provider value={themes.dark}>
+        <Toolbar />
+      </ThemeContext.Provider>
+    );
+  }
+
+  function Toolbar(props) {
+    return (
+      <div>
+        <ThemedButton />
+      </div>
+    );
+  }
+
+  function ThemedButton() {
+    const theme = useContext(ThemeContext);
+    return (
+      <button style={{ background: theme.background, color: theme.foreground }}>
+        I am styled by theme context!
+      </button>
+    );
+  }
+  ```
+
+### `useReducer`
+```javascript
+const [state, dispatch] = useReducer(reducer, initialArg, init);
+```
+- useReducer is usually preferable to useState when you have complex state logic that involves multiple sub-values or when the next state depends on the previous one.
+- useReducer also lets you optimize performance for components that trigger deep updates because you can pass dispatch down instead of callbacks.
+- How to use it: </br>
+  ```javascript
+  const initialState = {count: 0};
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'increment':
+        return {count: state.count + 1};
+      case 'decrement':
+        return {count: state.count - 1};
+      default:
+        throw new Error();
+    }
+  }
+
+  function Counter() {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+      <>
+        Count: {state.count}
+        <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+        <button onClick={() => dispatch({type: 'increment'})}>+</button>
+      </>
+    );
+  }
+  ```
+- Lazy initialization by passing init function as the third argument. </br>
+  ```javascript
+  function init(initialCount) {
+    return {count: initialCount};
+  }
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'increment':
+        return {count: state.count + 1};
+      case 'decrement':
+        return {count: state.count - 1};
+      case 'reset':
+        return init(action.payload);
+      default:
+        throw new Error();
+    }
+  }
+
+  function Counter({initialCount}) {
+    const [state, dispatch] = useReducer(reducer, initialCount, init);
+    return (
+      <>
+        Count: {state.count}
+        <button
+          onClick={() => dispatch({type: 'reset', payload: initialCount})}>
+          Reset
+        </button>
+        <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+        <button onClick={() => dispatch({type: 'increment'})}>+</button>
+      </>
+    );
+  }
+  ```
+
+### `useCallback`
+```javascript
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+);
+```
+- Returns a memoized callback.
+- Pass an inline callback and an array of dependencies.
+- useCallback will return a memoized version of the callback that only changes if one of the dependencies has changed.
+- useCallback(fn, deps) is equivalent to useMemo(() => fn, deps).
+- Every value referenced inside the callback should also appear in the dependencies array.
+
+
+### `useMemo`
+```javascript
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
+- Returns a memoized value.
+- Pass a “create” function and an array of dependencies.
+- useMemo will only recompute the memoized value when one of the dependencies has changed. This optimization helps to avoid expensive calculations on every render.
+- Remember that the function passed to useMemo runs during rendering. Don’t do anything there that you wouldn’t normally do while rendering.
+
+### `useRef`
+```javascript
+const refContainer = useRef(initialValue);
+```
+- useRef returns a mutable ref object whose .current property is initialized to the passed argument (initialValue). 
+- The returned object will persist for the full lifetime of the component.
+- Common use case: </br>
+  ```javascript
+  function TextInputWithFocusButton() {
+    const inputEl = useRef(null);
+    const onButtonClick = () => {
+      // `current` points to the mounted text input element
+      inputEl.current.focus();
+    };
+    return (
+      <>
+        <input ref={inputEl} type="text" />
+        <button onClick={onButtonClick}>Focus the input</button>
+      </>
+    );
+  }
+  ```
+- Essentially, useRef is like a “box” that can hold a mutable value in its .current property.
+- If you pass a ref object to React with `<div ref={myRef} />`, React will set its .current property to the corresponding DOM node whenever that node changes.
+- Keep in mind that useRef doesn’t notify you when its content changes. Mutating the .current property doesn’t cause a re-render.
+
+### `useImperativeHandle`
+```javascript
+useImperativeHandle(ref, createHandle, [deps])
+```
+- useImperativeHandle customizes the instance value that is exposed to parent components when using ref.
+
+### `useLayoutEffect`
+- The signature is identical to useEffect, but it fires synchronously after all DOM mutations.
+- Use this to read layout from the DOM and synchronously re-render.
+
+### `useDebugValue`
+- useDebugValue can be used to display a label for custom hooks in React DevTools.
+- Usage: </br>
+  ```javascript
+  function useFriendStatus(friendID) {
+    const [isOnline, setIsOnline] = useState(null);
+
+    // ...
+
+    // Show a label in DevTools next to this Hook
+    // e.g. "FriendStatus: Online"
+    useDebugValue(isOnline ? 'Online' : 'Offline');
+
+    return isOnline;
+  }
+  ```
+- useDebugValue accepts a formatting function as an optional second parameter. This function is only called if the Hooks are inspected. Example: </br>
+  ```javascript
+  useDebugValue(date, date => date.toDateString());
+  ```
 
 
 </br>
@@ -1094,3 +1367,4 @@ function useFriendStatus(friendID) {
 - https://reactjs.org/docs/hooks-effect.html
 - https://reactjs.org/docs/hooks-rules.html
 - https://reactjs.org/docs/hooks-custom.html
+- https://reactjs.org/docs/hooks-reference.html
