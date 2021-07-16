@@ -38,7 +38,7 @@
     ```
 - findAll... methods return an array
 - findBy.... methods return a single object
-- The differences between find, get and query
+- The differences between find, get and query </br>
   ![img.png](images/img1.png)
 - The test has to mimic the user interaction as close as possible
 - The priority of finding elements:
@@ -219,6 +219,28 @@
 
     export default mockedAxios
     ```
+- How to run run something before/after each or all tests.
+  - Doing some import: `import '@testing-library/jest-dom/extend-expect'`
+  - Call the function: </br>
+    ```javascript
+    beforeAll(() => {
+        console.log('Run before all tests')
+    })
+
+    beforeEach(() => {
+        console.log('Run before each test')
+    })
+
+    afterEach(() => {
+        console.log('Run after each test')
+    })
+
+    afterAll(() => {
+        console.log('Run after all tests')
+    })
+    ```
+
+  
 
 ## References:
 - https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ

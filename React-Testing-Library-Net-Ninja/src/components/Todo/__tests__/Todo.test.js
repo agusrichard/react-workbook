@@ -1,5 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+
+import '@testing-library/jest-dom/extend-expect'
+
 import Todo from '../Todo'
 
 const MockedTodo = () => (
@@ -19,6 +22,22 @@ const addTodos = (todos) => {
 }
 
 describe('add new todo tests', () => {
+    beforeAll(() => {
+        console.log('Run before all tests')
+    })
+
+    beforeEach(() => {
+        console.log('Run before each test')
+    })
+
+    afterEach(() => {
+        console.log('Run after each test')
+    })
+
+    afterAll(() => {
+        console.log('Run after all tests')
+    })
+
     it('add one todo and assert the new todo', () => {
         render(<MockedTodo />)
 
