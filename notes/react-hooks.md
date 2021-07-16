@@ -9,6 +9,7 @@
 ### 3. [Official Docs - Hooks at a Glance](#content-3)
 ### 4. [Official Docs - Using the State Hook](#content-4)
 ### 5. [Official Docs - Using the Effect Hook](#content-5)
+### 6. [Official Docs - Rules of Hooks](#content-6)
 
 
 </br>
@@ -867,9 +868,229 @@ Note that hooks are:
 
 ---
 
+## [Official Docs - Rules of Hooks](https://reactjs.org/docs/hooks-rules.html) <span id="content-6"><span>
+
+### Only Call Hooks at the Top Level
+- Don’t call Hooks inside loops, conditions, or nested functions. 
+- Always use Hooks at the top level of your React function, before any early returns.
+
+### Only Call Hooks from React Functions
+- Don’t call Hooks from regular JavaScript functions.
+  - Call Hooks from React function components.
+  - Call Hooks from custom Hooks.
+
+### Explanation
+```javascript
+function Form() {
+  // 1. Use the name state variable
+  const [name, setName] = useState('Mary');
+
+  // 2. Use an effect for persisting the form
+  useEffect(function persistForm() {
+    localStorage.setItem('formData', name);
+  });
+
+  // 3. Use the surname state variable
+  const [surname, setSurname] = useState('Poppins');
+
+  // 4. Use an effect for updating the title
+  useEffect(function updateTitle() {
+    document.title = name + ' ' + surname;
+  });
+
+  // ...
+}
+```
+- So how does React know which state corresponds to which useState call? The answer is that React relies on the order in which Hooks are called.
+- The flow of the above code: </br>
+  ```javascript
+  // ------------
+  // First render
+  // ------------
+  useState('Mary')           // 1. Initialize the name state variable with 'Mary'
+  useEffect(persistForm)     // 2. Add an effect for persisting the form
+  useState('Poppins')        // 3. Initialize the surname state variable with 'Poppins'
+  useEffect(updateTitle)     // 4. Add an effect for updating the title
+
+  // -------------
+  // Second render
+  // -------------
+  useState('Mary')           // 1. Read the name state variable (argument is ignored)
+  useEffect(persistForm)     // 2. Replace the effect for persisting the form
+  useState('Poppins')        // 3. Read the surname state variable (argument is ignored)
+  useEffect(updateTitle)     // 4. Replace the effect for updating the title
+
+  // ...
+  ```
+- What happen if we put the hook inside an if statement? </br>
+  ```javascript
+  // 🔴 We're breaking the first rule by using a Hook in a condition
+    if (name !== '') {
+      useEffect(function persistForm() {
+        localStorage.setItem('formData', name);
+      });
+    }
+  ```
+- The logical flow changed to: </br>
+  ```javascript
+  useState('Mary')           // 1. Read the name state variable (argument is ignored)
+  // useEffect(persistForm)  // 🔴 This Hook was skipped!
+  useState('Poppins')        // 🔴 2 (but was 3). Fail to read the surname state variable
+  useEffect(updateTitle)     // 🔴 3 (but was 4). Fail to replace the effect
+  ```
+
+</br>
+
+---
+
+## [Official Docs - Building Your Own Hooks](https://reactjs.org/docs/hooks-custom.html) <span id="content-7"><span>
+
+### Intro
+```javascript
+import React, { useState, useEffect } from 'react';
+
+function FriendStatus(props) {
+  const [isOnline, setIsOnline] = useState(null);
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+
+  if (isOnline === null) {
+    return 'Loading...';
+  }
+  return isOnline ? 'Online' : 'Offline';
+}
+```
+
+Now let’s say that our chat application also has a contact list, and we want to render names of online users with a green color. We could copy and paste similar logic above into our FriendListItem component but it wouldn’t be ideal
+
+```javascript
+import React, { useState, useEffect } from 'react';
+
+function FriendListItem(props) {
+  const [isOnline, setIsOnline] = useState(null);
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+
+  return (
+    <li style={{ color: isOnline ? 'green' : 'black' }}>
+      {props.friend.name}
+    </li>
+  );
+}
+```
+
+### Extracting a Custom Hook
+Let's extract the NOT SO DRY code above, into something more DRY by writing a custom hook
+```javascript
+import { useState, useEffect } from 'react';
+
+function useFriendStatus(friendID) {
+  const [isOnline, setIsOnline] = useState(null);
+
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
+    };
+  });
+
+  return isOnline;
+}
+```
+- Make sure to only call other Hooks unconditionally at the top level of your custom Hook.
+- A custom Hook doesn’t need to have a specific signature. We can decide what it takes as arguments, and what, if anything, it should return. In other words, it’s just like a normal function.
+- Its name should always start with use so that you can tell at a glance that the rules of Hooks apply to it.
+
+### Using a Custom Hook
+- How to use our custom hook </br>
+  ```javascript
+  function FriendStatus(props) {
+    const isOnline = useFriendStatus(props.friend.id);
+
+    if (isOnline === null) {
+      return 'Loading...';
+    }
+    return isOnline ? 'Online' : 'Offline';
+  }
+
+  function FriendListItem(props) {
+  const isOnline = useFriendStatus(props.friend.id);
+
+    return (
+      <li style={{ color: isOnline ? 'green' : 'black' }}>
+        {props.friend.name}
+      </li>
+    );
+  }
+  ```
+- **Is this code equivalent to the original examples?** Yes, it works in exactly the same way.
+- **Do I have to name my custom Hooks starting with “use”?** Please do. This convention is very important.
+- **Do two components using the same Hook share state?** No. Custom Hooks are a mechanism to reuse stateful logic (such as setting up a subscription and remembering the current value).
+- **How does a custom Hook get isolated state?** Each call to a Hook gets isolated state. Because we call useFriendStatus directly, from React’s point of view our component just calls useState and useEffect. 
+
+
+### Tip: Pass Information Between Hooks
+- Since Hooks are functions, we can pass information between them.
+- Code snippet: </br>
+  ```javascript
+  const friendList = [
+    { id: 1, name: 'Phoebe' },
+    { id: 2, name: 'Rachel' },
+    { id: 3, name: 'Ross' },
+  ];
+
+  function ChatRecipientPicker() {
+    const [recipientID, setRecipientID] = useState(1);
+    const isRecipientOnline = useFriendStatus(recipientID);
+
+    return (
+      <>
+        <Circle color={isRecipientOnline ? 'green' : 'red'} />
+        <select
+          value={recipientID}
+          onChange={e => setRecipientID(Number(e.target.value))}
+        >
+          {friendList.map(friend => (
+            <option key={friend.id} value={friend.id}>
+              {friend.name}
+            </option>
+          ))}
+        </select>
+      </>
+    );
+  }
+  ```
+- When we select a different friend, we trigger the useEffect call, which means also trigger our custom hooks. So when the recepientID is changing, then the isRecipientOnline will change too.
+- 
+
+
+</br>
+
+---
+
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
 - https://reactjs.org/docs/hooks-overview.html
 - https://reactjs.org/docs/hooks-state.html
 - https://reactjs.org/docs/hooks-effect.html
+- https://reactjs.org/docs/hooks-rules.html
+- https://reactjs.org/docs/hooks-custom.html
