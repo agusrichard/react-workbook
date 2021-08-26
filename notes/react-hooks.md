@@ -10,6 +10,10 @@
 ### 4. [Official Docs - Using the State Hook](#content-4)
 ### 5. [Official Docs - Using the Effect Hook](#content-5)
 ### 6. [Official Docs - Rules of Hooks](#content-6)
+### 7. [Official Docs - Building Your Own Hooks](#content-7)
+### 8. [Official Docs - Hooks API Reference](#content-8)
+### 9. [React Hooks: Memoization](#content-9)
+### 10. [Use React.memo() wisely](#content-10)
 
 
 </br>
@@ -28,8 +32,8 @@ React Hooks are a way for your function components to “hook” into React’s 
   class Hello extends React.Component {
     constructor(props) {
       super(props);
-    }
 
+    }
     componentDidMount() {
     }
 
@@ -177,6 +181,8 @@ React Hooks are a way for your function components to “hook” into React’s 
   alert('Followed ' + props.user);
   ```
 
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
@@ -228,6 +234,9 @@ Note that hooks are:
 ### Gradual Adoption Strategy
 - **TLDR: There are no plans to remove classes from React.**
 - Crucially, Hooks work side-by-side with existing code so you can adopt them gradually.
+
+
+**[⬆ back to top](#list-of-contents)**
 
 </br>
 
@@ -369,6 +378,8 @@ Note that hooks are:
   ```
 - The state of each component is completely independent.
 - Each call to a Hook has a completely isolated state.
+
+**[⬆ back to top](#list-of-contents)**
 
 </br>
 
@@ -515,6 +526,9 @@ Note that hooks are:
 ### Tip: Using Multiple State Variables
 - Declaring state variables as a pair of [something, setSomething] is also handy because it lets us give different names to different state variables if we want to use more than one.
 - Unlike this.setState in a class, updating a state variable always replaces it instead of merging it.
+
+
+**[⬆ back to top](#list-of-contents)**
 
 </br>
 
@@ -864,6 +878,8 @@ Note that hooks are:
 - If you want to run an effect and clean it up only once (on mount and unmount), you can pass an empty array ([]) as a second argument. This tells React that your effect doesn’t depend on any values from props or state, so it never needs to re-run.
 - Don’t forget that React defers running useEffect until after the browser has painted, so doing extra work is less of a problem.
 
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
@@ -938,6 +954,8 @@ function Form() {
   useState('Poppins')        // 🔴 2 (but was 3). Fail to read the surname state variable
   useEffect(updateTitle)     // 🔴 3 (but was 4). Fail to replace the effect
   ```
+
+**[⬆ back to top](#list-of-contents)**
 
 </br>
 
@@ -1080,12 +1098,14 @@ function useFriendStatus(friendID) {
   ```
 - When we select a different friend, we trigger the useEffect call, which means also trigger our custom hooks. So when the recepientID is changing, then the isRecipientOnline will change too.
 
+**[⬆ back to top](#list-of-contents)**
+
 
 </br>
 
 ---
 
-## [Official Docs - Hooks API Reference](https://reactjs.org/docs/hooks-reference.html) <span id="content-9"><span>
+## [Official Docs - Hooks API Reference](https://reactjs.org/docs/hooks-reference.html) <span id="content-8"><span>
 
 ### `useState`
 ```javascript
@@ -1355,10 +1375,353 @@ useImperativeHandle(ref, createHandle, [deps])
   ```
 
 
+**[⬆ back to top](#list-of-contents)**
+
+
 </br>
 
 ---
 
+## [React Hooks: Memoization](https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853) <span id="content-9"><span>
+
+
+### Should you memoize?
+- Solving imaginary performance problems is a real thing, so before you start optimizing, make sure you are familiar with React Profiler.
+- React.memo is a performance optimization tool, a higher order component.
+- If your function component renders the same result given the same props, React will memoize, skip rendering the component, and reuse the last rendered result.
+- By default it will only shallowly compare complex objects in the props object. If you want control over the comparison, you can also provide a custom comparison function as the second argument.
+
+### No memoization
+- Example where performance issue might happen:
+  ```javascript
+  function List({ items }) {
+    log('renderList');
+    return items.map((item, key) => (
+      <div key={key}>item: {item.text}</div>
+    ));
+  }
+  export default function App() {
+    log('renderApp');
+    const [count, setCount] = useState(0);
+    const [items, setItems] = useState(getInitialItems(10));
+    return (
+      <div>
+        <h1>{count}</h1>
+        <button onClick={() => setCount(count + 1)}>
+          inc
+        </button>
+        <List items={items} />
+      </div>
+    );
+  }
+  ```
+- Above's explanation:
+  - Every time inc is clicked, both renderApp and renderList are logged, even though nothing has changed for List.
+  - If the tree is big enough, it can easily become performance bottleneck. We need to reduce number of renders.
+
+### Simple memoization
+- Example:
+  ```javascript
+  const List = React.memo(({ items }) => {
+    log('renderList');
+    return items.map((item, key) => (
+      <div key={key}>item: {item.text}</div>
+    ));
+  });
+  export default function App() {
+    log('renderApp');
+    const [count, setCount] = useState(0);
+    const [items, setItems] = useState(getInitialItems(10));
+    return (
+      <div>
+        <h1>{count}</h1>
+        <button onClick={() => setCount(count + 1)}>
+          inc
+        </button>
+        <List items={items} />
+      </div>
+    );
+  }
+  ```
+- Above's explanation:
+  - In this example memoization works properly and reduces number of renders.
+  - During mount renderApp and renderList are logged, but when inc is clicked, only renderApp is logged.
+
+### Memoization & callback
+- Beware, passing callback to memoized component can cause subtle bugs.
+- Example:
+  ```javascript
+  function App() {
+    log('renderApp');
+
+    const [count, setCount] = useState(0);
+    const [items, setItems] = useState(getInitialItems(10));
+
+    return (
+      <div>
+        <div style={{ display: 'flex' }}>
+          <h1>{count}</h1>
+          <button onClick={() => setCount(count + 1)}>
+            inc
+          </button>
+        </div>
+        <List
+          items={items}
+          inc={() => setCount(count + 1)}
+        />
+      </div>
+    );
+  }
+  ```
+- Above's explanation:
+  - In this example, our memoization fails. Since we are using inline lambda, new reference is created for each render, making React.memo useless.
+  - We need a way to memoize the function itself, before we can memoize the component.
+  
+
+### useCallback
+- `useMemo` is useful for expensive calculations, `useCallback` is useful for passing callbacks needed for optimized child components.
+- Example:
+  ```javascript
+  function App() {
+    log('renderApp');
+
+    const [count, setCount] = useState(0);
+    const [items, setItems] = useState(getInitialItems(10));
+
+    const inc = useCallback(() => setCount(count + 1));
+
+    return (
+      <div>
+        <div style={{ display: 'flex' }}>
+          <h1>{count}</h1>
+          <button onClick={inc}>inc</button>
+        </div>
+        <List items={items} inc={inc} />
+      </div>
+    );
+  }
+  ```
+- Above's explanation:
+  - In this example, our memoization fails again.renderList is called every time inc is pressed.
+  - Default behavior of useCallback is to compute new value whenever new function instance is passed.
+  - Since inline lambdas create new instance during every render, useCallback with default config is useless here.
+
+### `useCallback` with input
+- Basic form:
+  ```javascript
+  const inc = useCallback(() => setCount(count + 1), [count]);
+  ```
+- Explanation:
+  - `useCallback` takes second argument, an array of inputs and only if those inputs change will useCallback return new value.
+  - In this example, useCallback will return new reference every time count changes.
+  - Since count changes during each render, useCallback will return new value during each render. This code does not memoize as well.
+- Another form:
+  ```javascript
+  const inc = useCallback(() => setCount(count + 1), []);
+  ```
+- Explanation:
+  - `useCallback` can take an empty array as input, which will call inner lambda only once and memoize the reference for future calls.
+  - This code does memoize, one renderApp will be called when clicking any button, main inc button will work correctly, but inner inc buttons will stop working correctly.
+  - Counter will increment from 0 to 1 and it will stop after that.
+  - Lambda is created once, but called multiple times. Since count is 0 when lambda is created, it behaves exactly as the code below:
+    ```javascript
+    const inc = useCallback(() => setCount(1), []);
+    ```
+
+### useState with functional updates
+- Example:
+  ```javascript
+  const inc = useCallback(() => setCount(c => c + 1), []);
+  ```
+- Explanation:
+  - Setters returned by useState can take function as an argument, where you can read previous value of a given state.
+
+
+### useReducer
+- Example:
+  ```javascript
+  const [count, dispatch] = useReducer(c => c + 1, 0);
+  ```
+- `useReducer` memoization works exactly as useState in this case.
+- Since `dispatch` is guaranteed to have same reference across renders, `useCallback` is not needed, which makes code less error-prone to memoization related bugs.
+
+
+### useReducer vs useState
+- `useReducer` is more suited for managing state objects that contain multiple sub-values or when the next state depends on the previous one.
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+## [Use React.memo() wisely](https://dmitripavlutin.com/use-react-memo-wisely/) <span id="content-10"><span>
+
+### Introduction
+- Users enjoy fast and responsive user interfaces (UI). A UI response delay of fewer than 100 milliseconds feels instant to the user but a delay between 100 and 300 milliseconds is already perceptible.
+- To improve user interface performance, React offers a higher-order component React.memo(). When React.memo() wraps a component, React memoizes the rendered output of the wrapped component then skips unnecessary renderings.
+
+### 1. React.memo()
+- When a component is wrapped in React.memo(), React renders the component and memoizes the result. Before the next render, if the new props are the same, React reuses the memoized result skipping the next rendering.
+- Example:
+  ```javascript
+  export function Movie({ title, releaseDate }) {
+    return (
+      <div>
+        <div>Movie title: {title}</div>
+        <div>Release date: {releaseDate}</div>
+      </div>
+    );
+  }
+
+  export const MemoizedMovie = React.memo(Movie);
+  ```
+- React reuses the memoized content as long as title and releaseDate props are the same between renderings:
+  ```javascript
+  // First render - MemoizedMovie IS INVOKED.
+  <MemoizedMovie 
+    title="Heat" 
+    releaseDate="December 15, 1995" 
+  />
+
+  // Second render - MemoizedMovie IS NOT INVOKED.
+  <MemoizedMovie
+    title="Heat" 
+    releaseDate="December 15, 1995" 
+  />
+  ```
+- You gain a performance boost: by reusing the memoized content, React skips rendering the component and doesn’t perform a virtual DOM difference check.
+- By default React.memo() does a shallow comparison of props and objects of props.
+- To customize the props comparison you can use the second argument to indicate an equality check function:
+  ```javascript
+  React.memo(Component, [areEqual(prevProps, nextProps)]);
+  ```
+- `areEqual(prevProps, nextProps)` function must return true if `prevProps` and `nextProps` are equal.
+- Example:
+  ```javascript
+  function moviePropsAreEqual(prevMovie, nextMovie) {
+    return prevMovie.title === nextMovie.title
+      && prevMovie.releaseDate === nextMovie.releaseDate;
+  }
+
+  const MemoizedMovie2 = React.memo(Movie, moviePropsAreEqual);
+  ```
+
+### 2. When to use React.memo()
+- When... Hmm?
+  ![when to use react memo](https://dmitripavlutin.com/static/c07d2ce4ede6301197b9605a75ae9b4e/5fd6b/when-to-use-react-memo-infographic.jpg)
+- The best case of wrapping a component in React.memo() is when you expect the functional component to render often and usually with the same props.
+- A common situation that makes a component render with the same props is being forced to render by a parent component.
+- Example:
+  ```javascript
+  function MovieViewsRealtime({ title, releaseDate, views }) {
+    return (
+      <div>
+        <Movie title={title} releaseDate={releaseDate} />
+        Movie views: {views}
+      </div>
+    );
+  }
+  ```
+  ```javascript
+  // Initial render
+  <MovieViewsRealtime 
+    views={0} 
+    title="Forrest Gump" 
+    releaseDate="June 23, 1994" 
+  />
+
+  // After 1 second, views is 10
+  <MovieViewsRealtime 
+    views={10} 
+    title="Forrest Gump" 
+    releaseDate="June 23, 1994" 
+  />
+
+  // After 2 seconds, views is 25
+  <MovieViewsRealtime 
+    views={25} 
+    title="Forrest Gump" 
+    releaseDate="June 23, 1994" 
+  />
+
+  // etc
+  ```
+- Every time views prop is updated with a new number, MovieViewsRealtime renders. This triggers Movie rendering too, even if title and releaseDate remain the same.
+- Use the memoized component:
+  ```javascript
+  function MovieViewsRealtime({ title, releaseDate, views }) {
+    return (
+      <div>
+        <MemoizedMovie title={title} releaseDate={releaseDate} />
+        Movie views: {views}
+      </div>
+    )
+  }
+  ```
+- The more often the component renders with the same props, the heavier and the more computationally expensive the output is, the more chances are that component needs to be wrapped in React.memo().
+
+
+### 3. When to avoid React.memo()
+- If the component isn’t heavy and usually renders with different props, most likely you don’t need React.memo().
+- Use the following rule of thumb: don’t use memoization if you can’t quantify the performance gains.
+- Performance-related changes applied incorrectly can even harm performance. Use React.memo() wisely.
+- Extend PureComponent class or define a custom implementation of shouldComponentUpdate() method if you need memoization for class-based components.
+- If a component usually renders with different props, don't use `React.memo`.
+
+### 4. React.memo() and callback functions
+- The function object equals only to itself.
+- Every time a parent component defines a callback for its child, it creates new function instances.
+- A component that accepts a callback must be handled with care when applying memoization.
+- Example:
+  ```javascript
+  function MyApp({ store, cookies }) {
+    return (
+      <div className="main">
+        <header>
+          <MemoizedLogout
+            username={store.username}
+            onLogout={() => cookies.clear('session')}
+          />
+        </header>
+        {store.content}
+      </div>
+    );
+  }
+  ```
+- Even if provided with the same username value, MemoizedLogout renders every time because it receives new instances of onLogout callback.
+- To fix it, onLogout prop must receive the same callback instance. Let’s apply useCallback() to preserve the callback instance between renderings:
+  ```javascript
+  const MemoizedLogout = React.memo(Logout);
+
+  function MyApp({ store, cookies }) {
+    const onLogout = useCallback(
+      () => cookies.clear('session'), 
+      [cookies]
+    );
+    return (
+      <div className="main">
+        <header>
+          <MemoizedLogout
+            username={store.username}
+            onLogout={onLogout}
+          />
+        </header>
+        {store.content}
+      </div>
+    );
+  }
+  ```
+- `useCallback(() => cookies.clear('session'), [cookies])` always returns the same function instance as long as cookies is the same.
+
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
@@ -1368,3 +1731,5 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://reactjs.org/docs/hooks-rules.html
 - https://reactjs.org/docs/hooks-custom.html
 - https://reactjs.org/docs/hooks-reference.html
+- https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853
+- https://dmitripavlutin.com/use-react-memo-wisely/
