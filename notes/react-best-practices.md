@@ -6,6 +6,8 @@
 ### 1. [15 React Best Practices You Need to Follow in 2021](#content-1)
 ### 2. [21 Best Practices for a Clean React Project](#content-2)
 ### 3. [Clean Code vs. Dirty Code: React Best Practices](#content-3)
+### 4. [Handling async errors with Axios in React](#content-4)
+### 5. [How to handle API errors in your web app using axios](#content-5)
 
 </br>
 
@@ -57,9 +59,12 @@
 
 ### 15. Follow linting rules, break up lines that are too long
 
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
+
 
 ## [21 Best Practices for a Clean React Project](https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb) <span id="content-2"><span>
 
@@ -391,10 +396,11 @@ const onClickHandler = () => {
 ### 21. Alt Prop
 - Always include alt prop for `<img/>` tags.
 
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
-
 
 ## [Clean Code vs. Dirty Code: React Best Practices](https://americanexpress.io/clean-code-dirty-code/) <span id="content-3"><span>
 
@@ -608,6 +614,8 @@ const onClickHandler = () => {
   const [language, country] = locale.split('-');
   ```
 
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
@@ -675,6 +683,221 @@ export const Text = styled.span`
 `;
 ```
 
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+
+## [Handling async errors with Axios in React](https://www.intricatecloud.io/2021/06/handling-async-errors-with-axios-in-react/) <span id="content-4"><span>
+
+### Introduction
+- 4 scenarios we should handle when working with APIs using axios and react:
+  - Handling requests that sometimes take longer than usual and leave the user looking at an empty page
+  - Handling requests that have errored and you want to give the user a way out
+  - Handling a possible timeout where the request is taking significantly longer than usual and giving the user an updated loading message so they see the page isn't frozen
+  - Handling a definite timeout where you want to abort the request to give the user a more specific error message
+- Example:
+  ```javascript
+  const ResultsList = () => {
+    const [results, setResults] = useState([])
+
+    // run on load
+    useEffect(() => {
+      axios.get(apiUrl).then(response => {
+        setResults(response.data)
+      }).catch(err => {
+        console.log(err)
+      })
+    }, [])
+
+    return (
+      <ul>
+        { results.map(result => {
+            return <li>{result.name}</li>
+          })
+        }
+      </ul>
+    )
+  }
+  ```
+- `results` started with as an empty list. Then it catched the result from the API call. Can you find the bugs?
+
+
+### 1. Handling long response times
+- If to get a response took a longer amount of time, probably the user will ask "Am I supposed to see something?". To prevent this sort of question, we can solve it using this:
+  ```javascript
+  const ResultsList = () => {
+  +  const [results, setResults] = useState(null)
+
+  ...
+
+  +  const getListItems = () => {
+  +    if(results) {
+  +      return results.map(result => {
+  +        return <li>{result.name}</li>
+  +    })
+  +    } else {
+  +      return (
+  +        <div>
+  +          <i class="fas fa-spinner fa-spin"></i>
+  +          Results are loading...
+  +       </div>
+  +      )
+  +    }
+  +   }
+  +
+  +  return (
+  +    <div>
+  +      <ul>{getListItems()}</ul>
+  +    </div>
+  +    )
+    }
+  ```
+- There are 2 changes
+  - Rather than initialize results to an empty array [], its initialized to null.
+  - I can then check if I should show a loading message, or if I should show the list with data.
+
+
+### 2. Handling errors
+- Example:
+  ```javascript
+  const ResultsList = () => {
+  const [results, setResults] = useState(null)
+  + const [error, setError] = useState(null)
+
+  + const loadData = () => {
+  +   return axios.get(apiUrl).then(response => {
+  +     setResults(response.data)
+  +     setError(null)
+  +   }).catch(err => {
+  +     setError(err)
+  +   })
+  + }
+
+    // run on load
+    useEffect(() => {
+  +   loadData()
+  -    ...
+    }, [])
+
+  + const getErrorView = () => {
+  +   return (
+  +     <div>
+  +       Oh no! Something went wrong.
+  +       <button onClick={() => loadData()}>
+  +         Try again
+  +.      </button>
+  +     </div>
+  +   )
+  + }
+
+    return (
+      <div>
+  +    <ul>
+  +      {  error ? 
+  +        getListItems() : getErrorView() 
+  +      }
+  +    </ul>
+  -    <ul>{getListItems()}</ul>
+      </div>
+      )
+    }
+  ```
+
+
+### 3. Handling a possible timeout
+- Every once in awhile, a user will come across a loading spinner, and they'll wonder - "Is it frozen and the icon is just spinning or does it really take this long?"
+- If a request is taking awhile, you can give the user a little feedback in the form of, "This is taking longer than usual..."
+- Example:
+  ```javascript
+  + const TIMEOUT_INTERVAL = 60 * 1000
+
+  const loadData = () => {
+  +   if (results) setResults(null)
+
+      // make the request
+      axios.get(apiUrl).then(response => {
+        setResults(response.data)
+        setError(null)
+      }).catch(err => {
+        setError(err)
+      })
+
+  +   // show an update after a timeout period
+  +   setTimeout(() => {
+  +     if (!results && !error) {
+  +       setError(new Error('Timeout'))
+  +     }
+  +   }, TIMEOUT_INTERVAL)
+  }
+
+  const getErrorView = () => {
+  +   if (error.message === 'Timeout') {
+  +     <div>This is taking longer than usual</div>
+  +   } else {
+        return (
+          <div>
+            Oh no! Something went wrong.
+            <button onClick={() => loadData()}>
+             Try again
+            </button>
+          </div>
+        )
+  +    }
+  }
+  ```
+
+### 4. Handling a definite timeout
+- Example:
+  ```javascript
+  const getErrorView = () => {
+      if (error.message === 'Timeout') {
+        <div>This is taking longer than usual</div>
+  +    } else if (error.message.includes('timeout')) {
+  +      <div>This is taking too long. Something is wrong - try again later.</div>
+  +    } else {
+        return ...
+      }
+  }
+  ```
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+
+## [How to handle API errors in your web app using axios](https://www.intricatecloud.io/2020/03/how-to-handle-api-errors-in-your-web-app-using-axios/) <span id="content-5"><span>
+
+### Introduction
+- Example:
+  ```javascript
+  axios.get('/my-highly-available-api').then(response => {
+      // do stuff
+  })
+  .catch(err => {
+      // what now?
+      console.log(err);
+  })
+  ```
+
+### Catching axios errors
+- If your error object contains a response field, that means your server responded with a 4xx/5xx error.
+- Do things like a show a 404 Not Found page/error message if your API returns a 404. Show a different error message if your backend is returning a 5xx or not returning anything at all.
+- Due to security constraints on JS in the browser, if you make an API request, and it fails due to crappy networks, the only error you'll see is "Network Error" which is incredibly unhelpful.
+
+### How do you fix it?
+- For example, if the request fails, and the page is useless without that data, then we have a bigger error page that will appear and offer users a way out - which sometimes is only a "Refresh the page" button.
+- Another example, if a request fails for a profile picture in a social media stream, we can show a placeholder image and disable profile picture changes, along with a toaster message explaining why the "update profile picture" button is disabled.
+- 
+
+
+**[⬆ back to top](#list-of-contents)**
+
 </br>
 
 ---
@@ -684,3 +907,5 @@ export const Text = styled.span`
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
 - https://americanexpress.io/clean-code-dirty-code/
 - https://dev.to/awedis/react-best-practices-4l4m
+- https://www.intricatecloud.io/2021/06/handling-async-errors-with-axios-in-react/
+- https://www.intricatecloud.io/2020/03/how-to-handle-api-errors-in-your-web-app-using-axios/
