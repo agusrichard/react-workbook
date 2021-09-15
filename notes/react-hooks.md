@@ -14,6 +14,7 @@
 ### 8. [Official Docs - Hooks API Reference](#content-8)
 ### 9. [React Hooks: Memoization](#content-9)
 ### 10. [Use React.memo() wisely](#content-10)
+### 11. [React Hooks: async function in the useEffect](#content-11)
 
 
 </br>
@@ -1716,12 +1717,78 @@ useImperativeHandle(ref, createHandle, [deps])
 - `useCallback(() => cookies.clear('session'), [cookies])` always returns the same function instance as long as cookies is the same.
 
 
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+
+## [React Hooks: async function in the useEffect](https://medium.com/@daniald/react-hooks-async-function-in-the-useeffect-eed17e6dc884) <span id="content-11"><span>
+
+### Introduction
+- When you’re new to React Hooks, you may notice that you get warnings and bugs if you use an async function inside the `useEffect` Hook.
+  
+### Why is this happening?
+- Async functions always return a promise so you will have the actual value until the Promise is fulfilled.
+- Anti-Pattern: async function directly in the useEffect.
+  ```javascript
+  useEffect(async () => {
+   console.log(‘Hi :)’)
+  return () => {
+   console.info(‘Bye!’) // It won’t run
+   };
+  }, []);
+  ```
+- You don’t have to unmount callback unless you use await expression before it.
+  ```javascript
+  unmount = await (async () => {
+  console.log(‘Hi :)’)
+  return () => {
+  console.info(‘Bye!’)
+  };
+  })()
+  unmount()
+  // Hi :)
+  // Bye!
+  ```
+- Code example: using unmount in a function.
+  ```javascript
+  unmount = (() => {
+  console.log(‘Hi :)’)
+  return () => {
+  console.info(‘Bye!’) // 👍 
+  };
+  })()
+  unmount()
+  // Hi :)
+  // Bye!
+  ```
+- Code example: using an async function in the useEffect.
+  ```javascript
+  useEffect(() => {
+      (async () => {
+        const products = await api.index()
+        setFilteredProducts(products)
+        setProducts(products)
+      })()
+  return () => {
+        unsubscribeOrRemoveEventHandler() // 👍 
+      }
+    }, [])
+  return () => {
+   unsubscribeOrRemoveEventHandler() // 👍 
+   }
+   }, [])
+  ```
+
 
 **[⬆ back to top](#list-of-contents)**
 
 </br>
 
 ---
+
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
@@ -1733,3 +1800,4 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://reactjs.org/docs/hooks-reference.html
 - https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853
 - https://dmitripavlutin.com/use-react-memo-wisely/
+- https://medium.com/@daniald/react-hooks-async-function-in-the-useeffect-eed17e6dc884

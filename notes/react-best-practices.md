@@ -8,6 +8,7 @@
 ### 3. [Clean Code vs. Dirty Code: React Best Practices](#content-3)
 ### 4. [Handling async errors with Axios in React](#content-4)
 ### 5. [How to handle API errors in your web app using axios](#content-5)
+### 6. [You Have to Know Closures to be a (Good) React Developer](#content-6)
 
 </br>
 
@@ -893,7 +894,100 @@ export const Text = styled.span`
 ### How do you fix it?
 - For example, if the request fails, and the page is useless without that data, then we have a bigger error page that will appear and offer users a way out - which sometimes is only a "Refresh the page" button.
 - Another example, if a request fails for a profile picture in a social media stream, we can show a placeholder image and disable profile picture changes, along with a toaster message explaining why the "update profile picture" button is disabled.
-- 
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+
+## [You Have to Know Closures to be a (Good) React Developer](https://javascript.plainenglish.io/you-have-to-know-closures-to-be-a-good-react-developer-104fc2f6cd70) <span id="content-6"><span>
+
+### What is a closure?
+- A closure is the combination of a function bundled together (enclosed) with references to its surrounding state (the lexical environment). In other words, a closure gives you access to an outer function’s scope from an inner function. In JavaScript, closures are created every time a function is created, at function creation time.
+- Closure means, that when JavaScript runs your code, it looks for all variables in your functions, and if it sees a variable in a function that has no declaration (- let, const) inside of it, but in an outer scope (where the function is nested in) it “locks” the value for that variable inside that given function.
+- Example:
+  ```javascript
+  const myOuterFunction = () => {
+    let variableInOuterFunction = 'Hello World';
+    const myNestedFunction = () => {
+      console.log(variableInOuterFunction);
+    };
+    myNestedFunction();
+  };
+  myOuterFunction();
+  ```
+- Notice how we use “variableInOuterFunction” (which is declared in myOuterFunction) inside “myNestedFunction”. That’s a closure. The value “Hello World” is now “closed” (locked) in the nested function.
+
+### Closures in React
+- Example:
+  ```javascript
+  import React, { useEffect, useState } from 'react';
+  const ClosuresInReact = () => {
+    const [count, setCount] = useState('1');
+    const incrementCount = () => {
+      setCount(prevCount => +prevCount + 1);
+    };
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        incrementCount();
+      }, 1000);
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [incrementCount]);
+    return <div>{`Timer started: ${count}`}</div>;
+  };
+  export default ClosuresInReact;
+  ```
+- Using useCallback:
+  ```javascript
+  import React, { useCallback, useEffect, useState } from 'react';
+  const ClosuresInReact = () => {
+    const [count, setCount] = useState('1');
+    const incrementCount = useCallback(() => {
+      setCount(prevCount => +prevCount + 1);
+    }, []);
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        incrementCount();
+      }, 1000);
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [incrementCount]);
+    return <div>{`Timer started: ${count}`}</div>;
+  };
+  export default ClosuresInReact;
+  ```
+
+### How to fix the closure issue in React
+- React: I have a useEffect hook that has incrementCount as a dependency. It means I should only re-render when incrementCount changes.
+- React: I have incrementCount wrapped with the useCallback hook. It means I should memorize the first closure of it (when it ran first) and even if a re-render happens I should not run the function with the refreshed environment (when count is now 2) but with its good old first closure I captured (when count is 1).
+- React: useEffect tells me that incrementCount is not changing, so I should not trigger a new render.
+- Example:
+  ```javascript
+  import React, { useCallback, useEffect, useState } from 'react';
+  const ClosuresInReact = () => {
+    const [count, setCount] = useState('1');
+    const incrementCount = useCallback(() => {
+      setCount(prevCount => +prevCount + 1);
+    }, [count]);
+    useEffect(() => {
+      console.log('useEffect');
+      const timer = setTimeout(() => {
+        incrementCount();
+      }, 1000);
+      return () => {
+        clearTimeout(timer);
+      };
+    }, [incrementCount]);
+    return <div>{`Timer started: ${count}`}</div>;
+  };
+  export default ClosuresInReact;
+  ```
 
 
 **[⬆ back to top](#list-of-contents)**
@@ -909,3 +1003,5 @@ export const Text = styled.span`
 - https://dev.to/awedis/react-best-practices-4l4m
 - https://www.intricatecloud.io/2021/06/handling-async-errors-with-axios-in-react/
 - https://www.intricatecloud.io/2020/03/how-to-handle-api-errors-in-your-web-app-using-axios/
+- https://javascript.plainenglish.io/you-have-to-know-closures-to-be-a-good-react-developer-104fc2f6cd70
+- https://javascript.plainenglish.io/you-have-to-know-closures-to-be-a-good-react-developer-104fc2f6cd70
