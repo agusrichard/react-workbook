@@ -15,6 +15,7 @@
 ### 9. [React Hooks: Memoization](#content-9)
 ### 10. [Use React.memo() wisely](#content-10)
 ### 11. [React Hooks: async function in the useEffect](#content-11)
+### 12. [useCallback and useMemo in Reactjs](#content-12)
 
 
 </br>
@@ -1789,6 +1790,88 @@ useImperativeHandle(ref, createHandle, [deps])
 
 ---
 
+## [useCallback and useMemo in Reactjs](https://medium.com/@edwardluu1102/usecallback-and-usememo-in-reactjs-5180b1b32a24) <span id="content-12"><span>
+
+### I. What?
+- “useCallback: returns a memoized callback.”
+- “useMemo: returns a memoized value.”
+- Both accept a function & an array of dependencies. 
+- The difference is that useCallback returns its function while useMemo calls its function then returns the result whenever there are changes in the dependency array. 
+
+### II. Why & How?
+- When a function is defined inside a functional component, it will be re-created and re-evaluated on every re-render.
+- In addition, if a functional parent component has a function passed as a property to a child component, it will cause its child to re-render no matter what.
+- Code:
+  ```javascript
+  const {useState, useMemo} = React;
+
+  function CountButton({number, onClick }) {
+    return <button onClick={onClick}>{number}</button>
+  };
+
+  function RandomButton({random}) {
+    return <p>{random}</p>
+  }
+
+  function App() {
+    const [increaseNumber, setIncreaseNumber] = React.useState(0)
+    
+    const random = () => {
+      return Math.random()
+    };
+    
+    return (
+      <>
+          <CountButton number={increaseNumber} onClick={() => {
+            setIncreaseNumber(increaseNumber + 1)
+          }} /> 
+        
+          <RandomButton random={random()}/>
+          
+      </>
+    );
+  }
+
+  ReactDOM.render(
+    <div className="App">
+      <div className="container">
+        <App />
+      </div>
+    </div>,
+    document.getElementById('root')
+  );
+  ```
+- Take a look at this example and you will see everytime you click the CountButton, it causes a change in App’s state. Therefore, RandomButton gets re-rendered(different number). Why does this happen? Let’s take a deeper look.
+- You might have already known that function is an object in Javascript and react component will re-render if its props or state changes.
+- If you define a function(object) inside a react functional component, it is not going to be the same function(object) you have defined before between re-renders, which results in referential inequality.
+- Everytime when you change the App component’s state, the “random” function is re-created, and the property “random” of RandomButton will take a new value which leads to re-render itself.
+
+### useMemo
+- “useMemo is to memoize a calculation result between a function’s calls and between renders.”
+- Memoize random:
+  ```javascript
+  const random = useMemo(() => {
+  return Math.random()
+  },[]);
+  ```
+- Don't change:
+  ```javascript
+  <RandomButton random={random()}/> to <RandomButton random={random}/>
+  ```
+- useMemo receives two params:
+  - A callback function
+  - An array of dependencies: Conceptually, every value referenced inside the callback should also appear in the dependencies array.
+
+### useCallback
+- “useCallback is to memorize a callback itself (referential equality) between renders”
+
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
@@ -1801,3 +1884,4 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853
 - https://dmitripavlutin.com/use-react-memo-wisely/
 - https://medium.com/@daniald/react-hooks-async-function-in-the-useeffect-eed17e6dc884
+- https://medium.com/@edwardluu1102/usecallback-and-usememo-in-reactjs-5180b1b32a24
