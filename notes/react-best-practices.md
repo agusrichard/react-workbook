@@ -9,6 +9,7 @@
 ### 4. [Handling async errors with Axios in React](#content-4)
 ### 5. [How to handle API errors in your web app using axios](#content-5)
 ### 6. [You Have to Know Closures to be a (Good) React Developer](#content-6)
+### 7. [Untold practices to write better React components](#content-7)
 
 </br>
 
@@ -996,6 +997,40 @@ export const Text = styled.span`
 
 ---
 
+## [Untold practices to write better React components](https://medium.com/geekculture/untold-practices-to-write-better-react-components-5593122802ec) <span id="content-7"><span>
+
+### Flags
+- Example:
+  ![](https://miro.medium.com/max/700/1*OJ5AOoXmjG2sBX1jq2VocQ.png)
+- Did you see something wrong? yeah, multiple flags are being managed for one API call.
+- This is a very simple example with one API call and all three flags are being reset at every effect.
+- Now let’s see a better version of this:
+  ![](https://miro.medium.com/max/700/1*BigHYirFF5rf_dgku1eVMw.png)
+- Management of multiple flags has been reduced to a single flag which is status and the code has become cleaner and more readable. And in the real world, you don't have to worry about checking multiple flags to determine the final state of the component or achieve some functionality.
+
+### useEffect
+- We use useEffect hook in function components for side effects.
+- Ideally, a component should do only one thing.
+- Example:
+  ![](https://miro.medium.com/max/605/1*G-ZFlZfdZN_y8bYJoDZsOw.png)
+- As you can see the problem, multiple things are being done in a single useEffectcall.
+- Though it is readable but harder to understand and manageable.
+- Smaller useEffect:
+  ![](https://miro.medium.com/max/658/1*gZmoo-PbCsGeKCXIAAwYQg.png)
+- If you cant make the component do one thing only, at least make theuseEffect to do one thing only.
+- For every new side effect, use new useEffect .
+
+### When to go for separate Component or Hook
+- If a component is doing more than one thing then its time to divide it.
+- If a thing is being used at more than one place then it is time to take it out and make it a separate entity.
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
@@ -1005,3 +1040,4 @@ export const Text = styled.span`
 - https://www.intricatecloud.io/2020/03/how-to-handle-api-errors-in-your-web-app-using-axios/
 - https://javascript.plainenglish.io/you-have-to-know-closures-to-be-a-good-react-developer-104fc2f6cd70
 - https://javascript.plainenglish.io/you-have-to-know-closures-to-be-a-good-react-developer-104fc2f6cd70
+- https://medium.com/geekculture/untold-practices-to-write-better-react-components-5593122802ec
