@@ -16,6 +16,8 @@
 ### 10. [Use React.memo() wisely](#content-10)
 ### 11. [React Hooks: async function in the useEffect](#content-11)
 ### 12. [useCallback and useMemo in Reactjs](#content-12)
+### 13. [How to escape React Hooks Hell](#content-13)
+### 14. [Advanced React Patterns with Hooks](#content-14)
 
 
 </br>
@@ -1865,6 +1867,515 @@ useImperativeHandle(ref, createHandle, [deps])
 ### useCallback
 - “useCallback is to memorize a callback itself (referential equality) between renders”
 
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+## [How to escape React Hooks Hell](https://blog.battlefy.com/how-to-escape-react-hooks-hell-a66c0d142c9e) <span id="content-13"><span>
+
+### Unnecessary useEffect to initialize setState
+- One of the first incantations people learn is using useEffect to run some initialization code once per mount. This leads people to abuse useEffect to set the initial value for useState. But the useEffect is redundant in this case.
+- useState can take an initial value or function.
+  ```javascript
+  // BEFORE
+  const [state, setState] = useState();
+
+  useEffect(() => {
+    setState(calculateInitialState());
+  }, []);
+
+
+  // AFTER
+  const [state, setState] = useState(calculateInitialState);
+  ```
+  ```javascript
+  // BEFORE
+  const [state, setState] = useState();
+
+  useEffect(() => {
+    setState('loading');
+  }, []);
+
+
+  // AFTER
+  const [state, setState] = useState('loading');
+  ```
+- Note, if the initial value comes from an async function, then there is no choice but to use useEffect
+
+### Unnecessary useEffect and useState for computed value
+- Sometimes there is a costly function that needs to be computed based off of a prop value. The naïve solution is to trigger the computation with useEffect with the prop value as the dependency and store the result with useState,
+- This can be simplified down to a single useMemo:
+  ```javascript
+  // BEFORE
+  const [costlyValue, setCostlyValue] = setState();
+
+  useEffect(() => {
+    setCostlyValue(computedCostlyValue(props.someParam));
+  }, [props.someParam]);
+
+
+  // AFTER
+  const costlyValue = useMemo(() => computedCostlyValue(props.someParam), [props.someParam]);
+  ```
+
+### Never use objects or arrays as dependencies
+- One of the most mystifying concepts with React Hooks is the dependency list. Why does it matter? When objects or arrays used as dependencies, it seems to just work, but this actually introduced a performance bug. React only uses triple equals === to check for dependency changes, thus it is not suitable for objects nor arrays.
+- When objects or arrays are used as dependencies, it effectively always re-runs the hook.
+  ```javascript
+  const BrokenComponent = (props) => {
+    useEffect(() => {
+      console.log('BrokenComponent called useEffect');
+    }, [props]); // THIS IS ALWAYS WRONG!
+
+    return <code>{JSON.stringify(props)}</code>;
+  };
+
+  const GoodComponent = (props) => {
+    useEffect(() => {
+      console.log('GoodComponent called useEffect');
+    }, [JSON.stringify(props)]); // Cheesy fix, better to explicitly list all props
+
+    return <code>{JSON.stringify(props)}</code>;
+  };
+  ```
+
+### Don’t useMemo entire inner components
+- The correct usage of useMemo is to only wrap it around the costly part.
+  ```javascript
+  // Good useMemo usage
+  const NormalComponent = ({ count }) => {
+    const costlyValue = useMemo(() => costlyFunction(count), [count]);
+    return <p>NormalComponent {costlyValue}</p>;
+  };
+
+  export default ({ count }) => {
+    // Slow component
+    const SlowComponent = () => {
+      const costlyValue = costlyFunction(count);
+      return <p>SlowComponent {costlyValue}</p>;
+    };
+
+    // Bad useMemo usage
+    const MemoizedComponent = useMemo(() => () => {
+      const costlyValue = costlyFunction(count);
+      return <p>MemoizedComponent {costlyValue}</p>;
+    }, [count]);
+
+    return <>
+      <SlowComponent />
+      <MemoizedComponent />
+      <NormalComponent count={count} />
+    </>;
+  };
+  ```
+
+### Avoid inner components
+- Inner components are often introduced as a means to avoid passing props to immediate children
+- They do have their place when the parent/child component is very tightly coupled and the child component doesn’t make sense on its own.
+- Extracting inner components makes it easier to test and reuse. It makes it easier to read the code of the parent component without having to keep in mind which variable are leaking in scope into the inner component.
+  ```javascript
+  // BAD
+  export default ({ count }) => {
+    const Label = () => {
+      return <code>{count}</code>;
+    };
+    
+    return <Label />;
+  };
+
+
+  // GOOD
+  const Label = ({ count }) => {
+    return <code>{count}</code>;
+  };
+
+  export default ({ count }) => {
+    return <Label count={count} />;
+  };
+  ```
+
+### useContext instead of prop drilling
+- Example:
+  ```javascript
+  // BEFORE
+  const App = () => {
+    const [locale, setLocale] = useState('english');
+    return <Navigation locale={locale} />;
+  };
+
+  const Navigation = ({ locale }) => {
+    return <Link locale={locale} href="/about">About</Link>;
+  };
+
+  const Link = ({ locale, href, children }) => {
+    return <a href={href}>{translate(locale, children)}</a>;
+  };
+    
+  // AFTER
+  const LocaleContext = React.createContext();
+  const App = () => {
+    const [locale, setLocale] = useState('english');
+    return <LocaleContext.Provider value={locale}>
+      <Navigation />
+    </LocaleContext.Provider>;
+  };
+
+  const Navigation = () => {
+    return <Link href="/about">About</Link>;
+  };
+
+  const Link = ({ href, children }) => {
+    const locale = useContext(LocaleContext);
+    return <a href={href}>{translate(locale, children)}</a>;
+  };
+  ```
+
+### Override context are unnecessary
+- Example:
+  ```javascript
+  // BAD
+  const LocaleContext = React.createContext();
+  const OverrideLocaleContext = React.createContext()
+
+  const App = () => {
+    const [locale, setLocale] = useState('english');
+    return <LocaleContext.Provider value={locale}>
+      <Navigation />
+    </LocaleContext.Provider>;
+  };
+
+  const Navigation = () => {
+    return <OverrideLocaleContext.Provider value="french">
+      <Link href="/href">About</Link>
+    </OverrideLocaleContext.Provider>;
+  };
+
+  const Link = ({ href, children }) => {
+    const locale = useContext(LocaleContext);
+    const overrideLocale = useContext(OverrideLocaleContext);
+    return <a href={href}>{translate(overrideLocale || locale, children)}</a>;
+  };
+
+    
+  // GOOD
+  const LocaleContext = React.createContext();
+
+  const App = () => {
+    const [locale, setLocale] = useState('english');
+    return <LocaleContext.Provider value={locale}>
+      <Navigation />
+    </LocaleContext.Provider>;
+  };
+
+  const Navigation = () => {
+    return <LocaleContext.Provider value="french">
+      <Link href="/href">About</Link>
+    </LocaleContext.Provider>;
+  };
+
+  const Link = ({ href, children }) => {
+    // uses closest Provider value, which is french
+    const locale = useContext(LocaleContext);
+    return <a href={href}>{translate(locale, children)}</a>;
+  };
+  ```
+
+### Extract repeated hook usage into a custom hook
+- Example:
+  ```javascript
+  import {createContext, useContext} from 'react';
+
+  const LocaleContext = createContext();
+
+  export const ProvideLocale = Locale.Provider;
+
+  export const useLocale = () => {
+    const locale = useContext(LocaleContext);
+    return locale;
+  };
+  ```
+  ```javascript
+  import {useMemo} from 'react';
+  import {useLocale} from './locale';
+
+  function translate(locale, englishKey) {..}
+
+  export const useTranslation = (englishKey) => {
+    const locale = useLocale();
+    return useMemo(() => translate(locale, englishKey), [locale, englishKey]);
+  };
+  ```
+  ```javascript
+  import {useTranslation} from './translation';
+
+  export const Link = ({ href, children }) => {
+    const translation = useTranslation(children);
+    return <a href={href}>{translation}</a>;
+  };
+  ```
+
+### Avoid re-renders by reducing useCallback dependencies
+- By default React will re-render the entire component tree and this leads to problems on very large sites.
+- React.memo is used to reduce the re-renders enhancing components to only re-render if any of the props have changed.
+- For non-trivial components, callback handlers such as onClick are often used. The function props passed into component are also checked for changes by React.memo. Function equality is not possible asides from checking for identity.
+- In English, React.memo uses triple equals === to check for changes for each prop and functions are never triple equals === unless its the same function.
+- The solution is to use the useCallback hook, but one needs to be careful on how to use it as the naïve approach can lead to returning a different function each time anyways.
+- One way to apply useCallback correctly is to remove the dependency that was causing the new function to be returned. 
+- Example:
+  ```javascript
+  // React.memo caches the functional component if all the props are triple equals ===
+  const Increment = React.memo(({ caller, onClick }) => {
+    console.log(`${caller} button rendered`);
+    return <button onClick={onClick}>Increment</button>;
+  });
+
+  const BadComponent = () => {
+    const [count, setCount] = useState(0);
+    // declared functions never triple equals ===, even if its the same code
+    // ie. (() => {}) === (() => {}) is false,
+    // but when const x = () => {}; x === x is true
+    // increment is different render to render
+    const increment = () => setCount(count + 1);
+
+    return <>
+      <h2>BadComponent</h2>
+      <Increment caller="BadComponent" onClick={increment} />
+      <p>{count}</p>
+    </>;
+  };
+
+  const StillBadComponent = () => {
+    const [count, setCount] = useState(0);
+    // useCallback always returns a new function since count changes
+    const increment = useCallback(() => setCount(count + 1), [count]);
+
+    return <>
+      <h2>StillBadComponent</h2>
+      <Increment caller="StillBadComponent" onClick={increment} />
+      <p>{count}</p>
+    </>;
+  };
+
+  const GoodComponent = () => {
+    const [count, setCount] = useState(0);
+    // removed count dependency by passing a function into setCount
+    // increment is always the same function as dependency array is now empty
+    const increment = useCallback(() => setCount((count) => count + 1), []);
+
+    return <>
+      <h2>GoodComponent</h2>
+      <Increment caller="GoodComponent" onClick={increment} />
+      <p>{count}</p>
+    </>;
+  };
+  ```
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+
+## [Advanced React Patterns with Hooks](https://abdevelops.medium.com/advanced-react-patterns-with-hooks-1de89b8baac7) <span id="content-14"><span>
+
+### Render Props
+- Example:
+  ```javascript
+  function Toggle ({ children, onToggle }) {
+
+    const [on, setOn] = React.useState(false)
+
+    const toggle = () => setOn((prevOn) => !prevOn)
+
+    React.useEffect(() => { // we do this so that the toggle the user passed in will be called anytime the state of on changes
+      onToggle(on)
+    }, [on, onToggle])]
+
+    const giveState = () => ({ on: on, onSwitch: toggle })
+
+    return children(giveState()) // we are returning the props we just created so our user can access them
+
+  }
+
+  // Usage
+  function Usage ({
+    onToggle = (...args) => console.log('onToggle', ...args),
+  }) {
+
+    return (
+      <Toggle onToggle={onToggle}>
+        {({ on, toggle }) => (
+
+          <div>
+
+            {on ? 'The button is on' : 'The button is off'}
+            <Switch on={on} onClick={toggle} />
+            <hr />
+            <button aria-label="custom-button" onClick={toggle}>
+              {on ? 'on' : 'off'}
+            </button>
+
+          </div>)}
+      </Toggle>
+
+    )
+  }
+  ```
+
+### Prop Getters
+- The prop getter pattern is very similar to the render props with some slight differences. Instead of just passing all of your props at once, you are giving the user a function that returns an object of props
+- Example:
+  ```javascript
+  function Toggle ({ onToggle, children }) {
+
+    const [on, setOn] = React.useState(false)
+
+    const toggle = () => setOn(!on)
+
+    React.useEffect(() => {
+      onToggle(on)
+    }, [on, onToggle])
+
+    const getTogglerProps = ({ onClick, ...props } = {}) => ({
+      'aria-expanded': on,
+      onClick: () => {
+        onClick && onClick(on) // we check if onClick exists before we execute it
+        toggle(on)
+      },
+      ...props,
+    })
+
+    const getStateAndHelpers = () => ({
+      on,
+      toggle,
+      getTogglerProps,
+    })
+
+    return children(getStateAndHelpers())
+  }
+  ```
+  ```javascript
+  // Usage 
+  function Usage ({
+    onToggle = (...args) => console.log('onToggle', ...args),
+    onButtonClick = () => console.log('onButtonClick'),
+  }) {
+
+    return (
+      <Toggle onToggle={onToggle}>
+        {({ on, getTogglerProps }) => (
+
+          <div>
+            <Switch {...getTogglerProps({ on })} />
+            <hr />
+            <button
+              {...getTogglerProps({
+                'aria-label': 'custom-button',
+                onClick: onButtonClick,
+                id: 'custom-button-id',
+              })}>
+
+              {on ? 'on' : 'off'}
+            </button>
+          </div>
+        )}
+
+      </Toggle>
+
+    )
+  }
+  ```
+
+### Compound Components
+- Compound components are really cool and my favorite pattern. They are two or more components that work together and share internal state with each other.
+- For example, think about the select html element. What would you always use it with? The option element right? That’s because those two elements are bounded together to accomplish a task. We can do the same thing in React.
+- Example:
+  ```javascript
+  // Here we are creating our context and giving it some initial state. You could leave this empty if you like.
+  const ToggleContext = React.createContext({
+      on: false,
+      toggle: () => {},
+  })
+
+  // This is our useToggleContext hook. It makes it easier to get our context and it throws an error to the user if they try to use it outside of our provider.
+  function useToggleContext() {
+    const context = React.useContext(ToggleContext)
+    if (!context) {
+      throw new Error(
+      'Warning: Context is being used outside of a provider',
+    )}
+    
+    return context
+  }
+
+  function Toggle({onToggle, children}) {
+  // we've seen this stuff before
+    const [on, setOn] = React.useState(false)
+    React.useEffect(() => {
+      onToggle(on)
+    }, [on, onToggle])
+  // We've seen this too..
+    const toggle = () => setOn((prevOn) => !prevOn)
+  // To cut down on the reRenders we want on assign our context state to a variable and place that into our context. 
+    const contextValue = {on, toggle}
+
+  // Here we are wrapping all of our children with our Provider, so any child we add can have access to our context data.
+  return (
+    <ToggleContext.Provider value={contextValue}>
+      {children}
+    </ToggleContext.Provider>
+  )}
+
+  // Below we are adding children (components) to our main component. This allows the user to pick and choose what the user wants to add for our Toggle Component. 
+  Toggle.On = ({children}) => {
+    
+    const {on} = useToggleContext()
+    
+    return on ? children : null
+  }
+
+  Toggle.Off = ({children}) => {
+    
+    const {on} = useToggleContext()
+    
+    return on ? null : children
+  }
+
+  Toggle.Button = (props) => {
+    
+    const {on, toggle} = useToggleContext()
+    
+    return <Switch on={on} onClick={toggle} {...props} />
+  }
+  ```
+  ```javascript
+  // Usage
+  function Usage({
+    onToggle = (...args) => console.log('onToggle', ...args),
+  }) {
+    
+  return (
+    
+    <Toggle onToggle={onToggle}>
+    
+      <div>
+        <Toggle.On>The button is on</Toggle.On>
+      </div>
+
+    <Toggle.Off>The button is off</Toggle.Off>
+
+      <div>
+        <Toggle.Button />
+      </div>
+
+    </Toggle>
+
+  )}
+  ```
+- Compound components can be created in a couple of different ways. However, here we are using the Context API. This helps us to avoid prop drilling and allows us to share state to only the components we choose.
 
 
 **[⬆ back to top](#list-of-contents)**
@@ -1872,6 +2383,7 @@ useImperativeHandle(ref, createHandle, [deps])
 </br>
 
 ---
+
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
@@ -1885,3 +2397,5 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://dmitripavlutin.com/use-react-memo-wisely/
 - https://medium.com/@daniald/react-hooks-async-function-in-the-useeffect-eed17e6dc884
 - https://medium.com/@edwardluu1102/usecallback-and-usememo-in-reactjs-5180b1b32a24
+- https://blog.battlefy.com/how-to-escape-react-hooks-hell-a66c0d142c9e
+- https://abdevelops.medium.com/advanced-react-patterns-with-hooks-1de89b8baac7
