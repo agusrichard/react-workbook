@@ -18,6 +18,7 @@
 ### 12. [useCallback and useMemo in Reactjs](#content-12)
 ### 13. [How to escape React Hooks Hell](#content-13)
 ### 14. [Advanced React Patterns with Hooks](#content-14)
+### 15. [React. Too many hooks spoil the soup — why hooks are bad…](#content-15)
 
 
 </br>
@@ -2384,6 +2385,36 @@ useImperativeHandle(ref, createHandle, [deps])
 
 ---
 
+## [React. Too many hooks spoil the soup — why hooks are bad…](https://medium.com/leocode/react-too-many-hooks-spoil-the-soup-why-hooks-are-bad-e728f004200) <span id="content-15"><span>
+
+### Introduction
+- Being skeptical about one’s own code is one of the greatest virtues a developer can possess.
+
+### What hooks do well?
+- While using class components, it is possible to share code between components which makes it much more troublesome. 
+- They also make creating small components really easy since you usually don’t need big class component boilerplates.
+
+### When are hooks debatable?
+- Hooks can lead to ending up with a messy code much easier than class components which strictly define component’s callbacks and state.
+
+### So why are they bad?
+- Hooks indirectly make functions that should be pure by passing the state in a „magical way” compared to the old school HOC/class component approaches.
+- Hooks require passing dependencies. If they are not passed, it can lead to unexpected and hard-to-debug behavior. Despite raw values, any callbacks should be added as dependencies as well. 
+- `useEffect` hook is the worst of all (since it can and is used for just about anything). It is usually used to modify DOM, modify state, call callbacks and so on. 
+- Hooks rely on dependencies, but at the same time, objects or arrays cannot be used as dependencies very easily because they are not comparable in a simple way (the default mechanism will compare references only).
+- Hooks rely on an execution order so it’s impossible to call a hook conditionally — it would change the hook order. That reduces the ability to actually structure the hook/component’s code.
+- All hook problems can be solved using hooks — so hooks bravely solve problems that they are causing.
+
+### Should I drop hooks?
+- No. They are a decent tool that really gets the job done. Without them, we would still be using class components. But let’s be conscious of their drawbacks and look for solutions — they are few at least. We need to focus on architecture, be skeptical about existing codes, and find a better way to handle those issues.
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
 ## References
 - https://serverless-stack.com/chapters/understanding-react-hooks.html
 - https://reactjs.org/docs/hooks-intro.html
@@ -2399,3 +2430,4 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://medium.com/@edwardluu1102/usecallback-and-usememo-in-reactjs-5180b1b32a24
 - https://blog.battlefy.com/how-to-escape-react-hooks-hell-a66c0d142c9e
 - https://abdevelops.medium.com/advanced-react-patterns-with-hooks-1de89b8baac7
+- https://medium.com/leocode/react-too-many-hooks-spoil-the-soup-why-hooks-are-bad-e728f004200
