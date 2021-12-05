@@ -12,17 +12,22 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"terminal.integrated.profiles.linux": {
-			"zsh": {
-				"path": "zsh",
-				"args": ["-l"]
-			}
-		},
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"workbench.colorTheme": "Winter is Coming (Dark Black)"
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+		"naumovs.color-highlight",
+		"donjayamanne.githistory",
+		"eamodio.gitlens",
+		"ritwickdey.liveserver",
+		"ms-vsliveshare.vsliveshare",
+		"esbenp.prettier-vscode",
+		"visualstudioexptteam.vscodeintellicode",
+		"pkief.material-icon-theme",
+		"johnpapa.winteriscoming"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -32,7 +37,7 @@
 	// "postCreateCommand": "yarn install",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "node",
+	// "remoteUser": "node",
 	"features": {
 		"git": "latest",
 		"github-cli": "latest"
