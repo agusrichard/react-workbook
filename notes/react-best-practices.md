@@ -10,6 +10,7 @@
 ### 5. [How to handle API errors in your web app using axios](#content-5)
 ### 6. [You Have to Know Closures to be a (Good) React Developer](#content-6)
 ### 7. [Untold practices to write better React components](#content-7)
+### 8. [10 Best Practices Every React Developer Should Follow](#content-8)
 
 </br>
 
@@ -1031,6 +1032,50 @@ export const Text = styled.span`
 
 ---
 
+## [10 Best Practices Every React Developer Should Follow](https://medium.com/dhiwise/10-best-practices-every-react-developer-should-follow-eb0df653c9) <span id="content-8"><span>
+
+### 1. Break larger components into smaller ones
+- That means instead of putting multiple functionalities in one component create one component that will be responsible for single functionality, the principle is called as “single responsibility principle”.
+  
+### 2. Use Functional Components instead of classes
+- Functional components are the stateless component that simply accepts data and display the output in some form, while Class components are stateful components that implement logic and state.
+- If you are writing the presentational component which doesn’t need to access the lifecycle method or have its own component state then you should use a functional component.
+- On the other hand, if you need to manage the state then use the class component.
+
+### 3. Choose styled-component over other CSS-in-JS libraries
+- It enables developers to write CSS which is nicely isolated per component while preserving the full power of cascading.
+
+### 4. Follow React way to Create separate folders for all files related to each component
+- Organize files according to components, if there are several small components used by another big component, keep all the related components within that another component folder only and maintain the same hierarchy in the entire project.
+- For example, the Form component has small components such as CSS files, icons, images, tests, and other sub-components all these should be placed in one folder.
+
+### 5. Avoid using Indexes as a Key Props
+- React uses key props to determine what to render or re-render, as react doesn’t waste time in rerendering duplicates. Thus, when the two elements have the same key one will be omitted by the React.
+- Another thing to worry about is, React also re-renders elements whose key has changed for a specific element content though the actual content hasn’t been changed.
+
+
+### 6. Use default props and prop types
+
+### 7. Avoid using props at initial state components
+- When you make the changes to the props next time on the component, it remains unchanged because the previous value will not be updated. The problem can be solved by avoiding the use of props at the initial state.
+
+### 8. Isolate stateful aspects from rendering
+- React components can be stateful or stateless. The stateful components keep track of changing data while the stateless components always render the same data.
+
+### 9. Always follow naming conventions
+- In react, there are mainly three naming conventions,
+  - The component should be PascalCase
+  - Elements that need key should be unique
+  - Methods should be written in camelCase and not be application-specific
+
+### 10. Write tests for the entire code
+- Testing ensures code integrity
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
