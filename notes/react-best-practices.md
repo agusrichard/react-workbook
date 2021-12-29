@@ -1076,6 +1076,8 @@ export const Text = styled.span`
 </br>
 
 ---
+
+I should learn something
 ## References:
 - https://www.codeinwp.com/blog/react-best-practices/
 - https://betterprogramming.pub/21-best-practices-for-a-clean-react-project-df788a682fb
