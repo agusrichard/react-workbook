@@ -5,6 +5,7 @@
 ## List of Contents:
 ### 1. [Presentational and Container Components](#content-1)
 ### 2. [React Clean Architecture](#content-2)
+### 3. [3 React Component Design Patterns You Should Know About](#content-3)
 
 
 </br>
@@ -354,6 +355,268 @@
 
 ---
 
+## [3 React Component Design Patterns You Should Know About](https://blog.openreplay.com/3-react-component-design-patterns-you-should-know-about) <span id="content-3"><span>
+
+### 1. Presentational and Container Component Pattern
+- In this pattern, components are divided into:
+  - Presentation Components: These are components that are responsible for how the UI looks. They don’t have any dependencies with any part of the application and are used to display data.
+    ```javascript
+    const ItemsList = (props) => {
+        return (
+        <ul>
+            {props.items.map((item) => (
+            <li key={item.id}>
+                <a href={item.url}>{item.name}</a>
+            </li>
+            ))}
+        </ul>
+        );
+    };
+    ```
+- In the example above, our ItemsList component is only responsible for displaying the data passed as props on the User interface
+- Presentational components are also called Stateless functional components but can also be written as class components and can contain state that relates to the UI.
+- As class component:
+  ```javascript
+  class TextInput extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        value: ""
+      };
+    }
+    render() {
+      return (
+        <input
+          value={this.state.value}
+          onChange={(event) => this.setState({ value: event.target.value })}
+        />
+      );
+    }
+  }
+  ```
+- Container Components: Unlike presentational components, Container components are more responsible for how things work.
+- They are usually class components that contain lifecycle methods and Presentational components. It is also where data fetching happens.
+  ```javascript
+  class TvShowsContainer extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        shows: [],
+        loading: false,
+        error: ""
+      };
+    }
+    componentDidMount() {
+      this.setState({ loading: true, error: "" });
+      fetch("https://api.tvmaze.com/schedule/web?date=2020-05-29")
+        .then((res) => res.json())
+        .then((data) => this.setState({ loading: false, shows: data }))
+        .catch((error) =>
+          this.setState({ loading: false, error: error.message || error })
+        );
+    }
+    render() {
+      const { loading, error, shows } = this.state;
+      return (
+        <div>
+          <h1> Tv Shows </h1>
+          {loading && <p>Loading...</p>}
+          {!loading && shows && <ItemsList items={shows} />}
+          {!loading && error && <p>{error}</p>}
+        </div>
+      );
+    }
+  }
+  ```
+- Do note that Dan also mentions that he’s no longer promoting this pattern as he’s changed his view on the matter since he originally coined it. However, you might find it useful for your particular use case which is why I thought it relevant to be mentioned on this list.
+
+### 2. Provider Pattern
+- One major problem faced by React developers is Prop drilling. Prop drilling is a scenario in which data(props) is passed down to different components until it gets to the component where the prop is needed.
+- Snippet:
+  ```javascript
+  import { createContext } from "react";
+  const ThemeContext = createContext({
+    theme: "light",
+    setTheme: () => {}
+  });
+  export default ThemeContext;
+  ```
+- Wrapping component inside context provider:
+  ```javascript
+  import React, { useState, useMemo } from "react";
+  import Header from "./Header";
+  import Main from "./Main";
+  import ThemeContext from "./context";
+  import "./styles.css";
+  export default function App() {
+    const [theme, setTheme] = useState("");
+    const value = useMemo(() => ({ theme, setTheme }), [theme]);
+    return (
+      <ThemeContext.Provider value={value}>
+        <div className="container">
+          <Header />
+          <Main />
+        </div>
+      </ThemeContext.Provider>
+    );
+  }
+  ```
+- Mutate and retrieve data using context:
+  ```javascript
+  import { useContext } from "react";
+  import ThemeContext from "./context";
+  const Header = () => {
+    const { theme, setTheme } = useContext(ThemeContext);
+    const toggleTheme = () => {
+      if (theme === "dark") {
+        setTheme("");
+        return;
+      }
+      setTheme("dark");
+      return;
+    };
+    return (
+      <header className={theme === "dark" && "dark"}>
+        <h1> Tv Shows </h1>
+        <button onClick={toggleTheme}>Toggle Theme</button>
+      </header>
+    );
+  };
+  export default Header;
+  import { useContext } from "react";
+  import ThemeContext from "./context";
+  const Main = () => {
+    const { theme } = useContext(ThemeContext);
+    return (
+      <main className={theme === "dark" && "dark"}>
+        <h2>
+          {" "}
+          {theme === "dark" ? "Dark theme enabled" : "Light theme enabled"}
+        </h2>
+      </main>
+    );
+  };
+  export default Main;
+  ```
+- Open Source Session Replay: Use this to debug a web application in project. It allows you to monitor and replya everything your users do and shows how your app behaves for every issue.
+
+### 3. Compound Components Pattern
+- Compound components are components that share a state and work together to achieve a common goal.
+- Implementation of the Menu component in Material UI:
+  ```javascript
+  import * as React from 'react';
+  import Menu from '@mui/material/Menu';
+  import MenuItem from '@mui/material/MenuItem';
+
+  export default function MaterialMenu() {
+    return (
+      <div>
+        <Button> Menu </Button>
+        <Menu>
+          <MenuItem>Profile</MenuItem>
+          <MenuItem>My account</MenuItem>
+          <MenuItem>Logout</MenuItem>
+        </Menu>
+      </div>
+    );
+  }
+  ```
+- Implementation of this design patter:
+  ```javascript
+  import {
+    createContext,
+    useState,
+    useCallback,
+    useMemo,
+    useContext
+  } from "react";
+  import "./styles.css";
+  const MenuContext = createContext();
+  const Menu = ({ children, defaultSelected }) => {
+    const [selectedItem, setSelectedItem] = useState(defaultSelected);
+    const toggleSelectedItem = useCallback(
+      (item) => {
+        if (item !== selectedItem) {
+          setSelectedItem(item);
+          return;
+        }
+        selectedItem("");
+      },
+      [selectedItem, setSelectedItem]
+    );
+    const value = useMemo(
+      () => ({
+        toggleSelectedItem,
+        selectedItem
+      }),
+      [toggleSelectedItem, selectedItem]
+    );
+    return (
+      <MenuContext.Provider value={value}>
+        <menu className="menu">{children}</menu>
+      </MenuContext.Provider>
+    );
+  };
+  ```
+- We’ve created a context object, MenuContext, for the Menu component using the createContext function provided by the React Context API. This will hold the shared state for the Menu and MenuItem components.
+- We’ve also created a state for a selected menu item. This will allow us to update the context similar to what we did in the Provider Pattern since the Context API is stateless by design.
+- Snippet:
+  ```javascript
+  const useMenuContext = () => {
+    const context = useContext(MenuContext);
+    if (!context) {
+      throw new Error(
+        "Menu item component cannot be used outside the Menu component."
+      );
+    }
+    return context;
+  };
+  const MenuItem = ({ value, children }) => {
+    const { toggleSelectedItem, selectedItem } = useMenuContext();
+    return (
+      <button
+        onClick={() => toggleSelectedItem(value)}
+        id={`${value}-menu-item`}
+        className={`menu__item ${selectedItem === value && "active"}`}
+      >
+        {children}
+      </button>
+    );
+  };
+  ```
+- Building MenuItem component:
+  ```javascript
+  const useMenuContext = () => {
+    const context = useContext(MenuContext);
+    if (!context) {
+      throw new Error(
+        "Menu item component cannot be used outside the Menu component."
+      );
+    }
+    return context;
+  };
+  const MenuItem = ({ value, children }) => {
+    const { toggleSelectedItem, selectedItem } = useMenuContext();
+    return (
+      <button
+        onClick={() => toggleSelectedItem(value)}
+        id={`${value}-menu-item`}
+        className={`menu__item ${selectedItem === value && "active"}`}
+      >
+        {children}
+      </button>
+    );
+  };
+  ```
+
+
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
 ## References:
 - https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0
 - https://kpiteng.medium.com/react-clean-architecture-e4144a0788b6
+- https://blog.openreplay.com/3-react-component-design-patterns-you-should-know-about
