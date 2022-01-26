@@ -19,6 +19,7 @@
 ### 13. [How to escape React Hooks Hell](#content-13)
 ### 14. [Advanced React Patterns with Hooks](#content-14)
 ### 15. [React. Too many hooks spoil the soup — why hooks are bad…](#content-15)
+### 16. [How to Memoize with React.useMemo()](#content-16)
 
 
 </br>
@@ -2408,6 +2409,117 @@ useImperativeHandle(ref, createHandle, [deps])
 ### Should I drop hooks?
 - No. They are a decent tool that really gets the job done. Without them, we would still be using class components. But let’s be conscious of their drawbacks and look for solutions — they are few at least. We need to focus on architecture, be skeptical about existing codes, and find a better way to handle those issues.
 
+**[⬆ back to top](#list-of-contents)**
+
+</br>
+
+---
+
+## [How to Memoize with React.useMemo()](https://dmitripavlutin.com/react-usememo-hook/) <span id="content-16"><span>
+
+### 1. useMemo() hook
+- useMemo() is a built-in React hook that accepts 2 arguments — a function compute that computes a result and the depedencies array
+  ```javascript
+  const memoizedResult = useMemo(compute, dependencies);
+  ```
+- During initial rendering, useMemo(compute, dependencies) invokes compute, memoizes the calculation result, and returns it to the component.
+- If during next renderings the dependencies don't change, then useMemo() doesn't invoke compute but returns the memoized value.
+- But if dependencies change during re-rendering, then useMemo() invokes compute, memoizes the new value, and returns it.
+- If your computation callback uses props or state values, then be sure to indicate these values as dependencies:
+  ```javascript
+  const memoizedResult = useMemo(() => {
+    return expensiveFunction(propA, propB);
+  }, [propA, propB]);
+  ```
+
+### 2. useMemo() — an example
+- A component `<CalculateFactorial />` calculates the factorial of a number introduced into an input field.
+- Example:
+  ```javascript
+  import { useState } from 'react';
+  export function CalculateFactorial() {
+    const [number, setNumber] = useState(1);
+    const [inc, setInc] = useState(0);
+    const factorial = factorialOf(number);
+    const onChange = event => {
+      setNumber(Number(event.target.value));
+    };
+    const onClick = () => setInc(i => i + 1);
+    
+    return (
+      <div>
+        Factorial of 
+        <input type="number" value={number} onChange={onChange} />
+        is {factorial}
+        <button onClick={onClick}>Re-render</button>
+      </div>
+    );
+  }
+  function factorialOf(n) {
+    console.log('factorialOf(n) called!');
+    return n <= 0 ? 1 : n * factorialOf(n - 1);
+  }
+  ```
+- On the other side, each time you click Re-render button, inc state value is updated. Updating inc state value triggers `<CalculateFactorial />` re-rendering. But, as a secondary effect, during re-rendering the factorial is recalculated again — 'factorialOf(n) called!' is logged to console.
+- By using useMemo(() => factorialOf(number), [number]) instead of simple factorialOf(number), React memoizes the factorial calculation.
+- Solution with useMemo:
+  ```javascript
+  import { useState, useMemo } from 'react';
+  export function CalculateFactorial() {
+    const [number, setNumber] = useState(1);
+    const [inc, setInc] = useState(0);
+    const factorial = useMemo(() => factorialOf(number), [number]);
+    const onChange = event => {
+      setNumber(Number(event.target.value));
+    };
+    const onClick = () => setInc(i => i + 1);
+    
+    return (
+      <div>
+        Factorial of 
+        <input type="number" value={number} onChange={onChange} />
+        is {factorial}
+        <button onClick={onClick}>Re-render</button>
+      </div>
+    );
+  }
+  function factorialOf(n) {
+    console.log('factorialOf(n) called!');
+    return n <= 0 ? 1 : n * factorialOf(n - 1);
+  }
+  ```
+
+### 3. useMemo() vs useCallback()
+- useCallback(), compared to useMemo(), is a more specialized hook that memoizes callbacks:
+  ```javascript
+  import { useCallback } from 'react';
+  function MyComponent({ prop }) {
+    const callback = () => {
+      return 'Result';
+    };
+    const memoizedCallback = useCallback(callback, [prop]);
+    
+    return <ChildComponent callback={memoizedCallback} />;
+  }
+  ```
+- You can use the same way the useMemo() to memoize callbacks:
+  ```javascript
+  import { useMemo } from 'react';
+  function MyComponent({ prop }) {
+    const callback = () => {
+      return 'Result';
+    };
+    const memoizedCallback = useMemo(() => callback, [prop]);
+    
+    return <ChildComponent callback={memoizedCallback} />;
+  }
+  ```
+
+### 4. Use memoization with care
+
+- While useMemo() can improve the performance of the component, you have to make sure to profile the component with and without the hook. Only after that make the conclusion whether memoization worth it.
+- When memoization is used inappropriately, it could harm the performance.
+
 
 **[⬆ back to top](#list-of-contents)**
 
@@ -2431,3 +2543,4 @@ useImperativeHandle(ref, createHandle, [deps])
 - https://blog.battlefy.com/how-to-escape-react-hooks-hell-a66c0d142c9e
 - https://abdevelops.medium.com/advanced-react-patterns-with-hooks-1de89b8baac7
 - https://medium.com/leocode/react-too-many-hooks-spoil-the-soup-why-hooks-are-bad-e728f004200
+- https://dmitripavlutin.com/react-usememo-hook/
