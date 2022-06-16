@@ -1,9 +1,20 @@
 version: "3.8"
 services:
- envoy:
-    image: envoyproxy/envoy-dev:e4955aed5694f9935d674419dbb364e744f697b4
-    volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.linux
     ports:
-      - "9901:9901"
-      - "8080:8080"
+      - "8000:8000"
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - proxy
+    tty: true
+    volumes:
+      - /app/node_modules
+      - .:/app
